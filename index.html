@@ -56,6 +56,14 @@
       <input type="number" id="lastMax">
     </label>
 
+    <!-- ➊  NEW: order-count filters -->
+    <label>Orders ≥
+      <input type="number" id="ordMin" placeholder="0">
+    </label>
+    <label>Orders ≤
+      <input type="number" id="ordMax">
+    </label>
+
     <label><input type="checkbox" id="lostOnly"> Lost customers only (90+ days)</label>
     <button id="applyBtn">Apply filters</button>
   </div>
@@ -150,12 +158,15 @@
       const totMax=parseFloat(document.getElementById('totMax').value)||Infinity;
       const lastMin=parseInt(document.getElementById('lastMin').value)||0;
       const lastMax=parseInt(document.getElementById('lastMax').value)||Infinity;
+      const ordMin=parseInt(document.getElementById('ordMin').value)||0;
+      const ordMax=parseInt(document.getElementById('ordMax').value)||Infinity;
       const lostOnly=document.getElementById('lostOnly').checked;
 
       list=list.filter(p=>
         p.avg>=avgMin && p.avg<=avgMax &&
         p.total>=totMin && p.total<=totMax &&
         p.daysAgo>=lastMin && p.daysAgo<=lastMax &&
+        p.orders>=ordMin && p.orders<=ordMax &&
         (!lostOnly || p.daysAgo>90)
       );
       list.sort((a,b)=>b.orders-a.orders);
