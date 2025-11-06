@@ -5,7 +5,17 @@
   <title>Restaurant Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <style>
-    body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
+    /* ===== FULL-SCREEN BACKGROUND ===== */
+    html,body{margin:0;height:100%}
+    body{
+      background:url("https://kms.zaatarwzeit.net/content/uploads/corporatepage/160614100811753~ZWZ_Meta.jpg")
+                no-repeat center center/cover;
+      font-family:system-ui,Arial,Helvetica,sans-serif;
+      padding:1rem;
+      color:#333;
+    }
+    /* ================================== */
+
     h1{text-align:center;margin-top:0}
     .controls{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;background:#fff;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
     .controls label{display:flex;flex-direction:column;font-size:.9rem}
@@ -20,24 +30,9 @@
     a{color:#1976d2;text-decoration:none}
     a:hover{text-decoration:underline}
     @media(max-width:700px){body{padding:.5rem} .controls{flex-direction:column}}
-
-    /* ===== CORNER-LOGO RULES ===== */
-    .corner-logos{position:fixed;top:0;left:0;right:0;height:70px;z-index:9999;pointer-events:none}
-    .corner-logos .logo{position:absolute;top:8px;height:54px;width:auto;max-width:180px;object-fit:contain}
-    .corner-logos .logo.left{left:12px}
-    .corner-logos .logo.right{right:12px}
   </style>
 </head>
 <body>
-
-  <!-- ===== TOP CORNER IMAGES ===== -->
-  <div class="corner-logos">
-    <img src="https://kms.zaatarwzeit.net/content/uploads/corporatepage/160614100811753~ZWZ_Meta.jpg"
-         alt="ZWZ Meta" class="logo left">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXB4PPmAuTieeu-jM-afIDbSYUWEBdek6TDQ&s"
-         alt="Corner logo" class="logo right">
-  </div>
-  <!-- ============================= -->
 
   <h1>Restaurant Dashboard</h1>
   <div id="msg">Loading data …</div>
