@@ -20,9 +20,25 @@
     a{color:#1976d2;text-decoration:none}
     a:hover{text-decoration:underline}
     @media(max-width:700px){body{padding:.5rem} .controls{flex-direction:column}}
+
+    /* ===== CORNER-LOGO RULES ===== */
+    .corner-logos{position:fixed;top:0;left:0;right:0;height:70px;z-index:9999;pointer-events:none}
+    .corner-logos .logo{position:absolute;top:8px;height:54px;width:auto;max-width:180px;object-fit:contain}
+    .corner-logos .logo.left{left:12px}
+    .corner-logos .logo.right{right:12px}
   </style>
 </head>
 <body>
+
+  <!-- ===== TOP CORNER IMAGES ===== -->
+  <div class="corner-logos">
+    <img src="https://kms.zaatarwzeit.net/content/uploads/corporatepage/160614100811753~ZWZ_Meta.jpg"
+         alt="ZWZ Meta" class="logo left">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXB4PPmAuTieeu-jM-afIDbSYUWEBdek6TDQ&s"
+         alt="Corner logo" class="logo right">
+  </div>
+  <!-- ============================= -->
+
   <h1>Restaurant Dashboard</h1>
   <div id="msg">Loading data …</div>
 
@@ -56,7 +72,6 @@
       <input type="number" id="lastMax">
     </label>
 
-    <!-- ➊  NEW: order-count filters -->
     <label>Orders ≥
       <input type="number" id="ordMin" placeholder="0">
     </label>
@@ -80,7 +95,7 @@
   </table>
 
   <script>
-    const DATA_URL = 'https://raw.githubusercontent.com/aladdinswelam-byte/customer-dashboard/main/data.json';
+    const DATA_URL = 'https://raw.githubusercontent.com/aladdinswelam-byte/customer-dashboard/main/data.json  ';
 
     let rawRows=[], aggPhones=[], uniqueOptions={};
     const today=new Date();
