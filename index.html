@@ -4,18 +4,18 @@
   <meta charset="utf-8"/>
   <title>Restaurant Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- SheetJS – only external dependency -->
+  <!-- SheetJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
 
   <style>
     body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
     h1{text-align:center;margin-top:0}
-    .upload-box{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem}
-    .upload-box input{font-size:.9rem}
-    .controls{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;background:#fff;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+    .upload-box{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;font-size:.9rem}
+    .upload-box #fileName{color:#555;font-weight:500}
+    .controls{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1rem;background:#fff;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
     .controls label{display:flex;flex-direction:column;font-size:.9rem}
-    select,input{padding:.4rem;border:1px solid #bbb;border-radius:4px}
-    button{background:#1976d2;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:4px;cursor:pointer}
+    .controls input,.controls select{padding:.4rem;border:1px solid #bbb;border-radius:4px}
+    button{background:#1976d2;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:4px;cursor:pointer;font-weight:500}
     button:hover{background:#1565c0}
     #stats{margin-bottom:.5rem;font-weight:500}
     table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,.1)}
@@ -24,13 +24,13 @@
     tr:nth-child(even){background:#f2f2f2}
     a{color:#1976d2;text-decoration:none}
     a:hover{text-decoration:underline}
-    @media(max-width:700px){body{padding:.5rem} .controls{flex-direction:column}}
+    @media(max-width:700px){body{padding:.5rem} .controls{flex-direction:column} .upload-box{flex-direction:column;align-items:flex-start}}
   </style>
 </head>
 <body>
   <h1>Restaurant Dashboard</h1>
 
-  <!-- ➊ EXCEL UPLOAD -->
+  <!-- 1.  EXCEL UPLOAD  -->
   <div class="upload-box">
     <label><strong>1.</strong> Pick Excel file:
       <input type="file" id="fileInput" accept=".xlsx,.xls"/>
@@ -38,43 +38,22 @@
     <span id="fileName"></span>
   </div>
 
-  <!-- ➋ FILTERS – unchanged layout -->
+  <!-- 2.  FILTERS  (same layout you had)  -->
   <div class="controls">
-    <label>Restaurant
-      <select id="restFilter"><option>All</option></select>
-    </label>
+    <label>Restaurant  <select id="restFilter"><option>All</option></select></label>
+    <label>Year        <select id="yearFilter"><option>All</option></select></label>
 
-    <label>Year
-      <select id="yearFilter"><option>All</option></select>
-    </label>
+    <label>Avg spend ≥  <input type="number" id="avgMin" step="0.01" placeholder="0"></label>
+    <label>Avg spend ≤  <input type="number" id="avgMax" step="0.01"></label>
 
-    <label>Avg spend ≥
-      <input type="number" id="avgMin" step="0.01" placeholder="0">
-    </label>
-    <label>Avg spend ≤
-      <input type="number" id="avgMax" step="0.01">
-    </label>
+    <label>Total spend ≥  <input type="number" id="totMin" step="0.01" placeholder="0"></label>
+    <label>Total spend ≤  <input type="number" id="totMax" step="0.01"></label>
 
-    <label>Total spend ≥
-      <input type="number" id="totMin" step="0.01">
-    </label>
-    <label>Total spend ≤
-      <input type="number" id="totMax" step="0.01">
-    </label>
+    <label>Days since last order ≥  <input type="number" id="lastMin" placeholder="0"></label>
+    <label>Days since last order ≤  <input type="number" id="lastMax"></label>
 
-    <label>Days since last order ≥
-      <input type="number" id="lastMin" placeholder="0">
-    </label>
-    <label>Days since last order ≤
-      <input type="number" id="lastMax">
-    </label>
-
-    <label>Orders ≥
-      <input type="number" id="ordMin" placeholder="0">
-    </label>
-    <label>Orders ≤
-      <input type="number" id="ordMax">
-    </label>
+    <label>Orders ≥  <input type="number" id="ordMin" placeholder="0"></label>
+    <label>Orders ≤  <input type="number" id="ordMax"></label>
 
     <label><input type="checkbox" id="lostOnly"> Lost customers only (90+ days)</label>
     <button id="applyBtn">Apply filters</button>
@@ -92,25 +71,34 @@
   </table>
 
   <script>
-    /* ----------  GLOBALS  ---------- */
-    let rawRows = [];          // every single order
-    let aggData = [];          // rolled-up per customer+restaurant
-    const today   = new Date();
+    /* ==========  CONFIG: columns you care about  ========== */
+    const COL_PHONE  = 'Account Phones';  // << change if your sheet uses another heading
+    const COL_NAME   = 'Account Name';
+    const COL_TOTAL  = 'Total Price';
+    const COL_DATE   = 'Created';        // << change if different
+    const COL_REST   = 'Resturant';      // yes, the typo is kept to match your file
 
+    /* ==========  GLOBALS  ========== */
+    let rawRows = [];   // every order we read
+    let aggData = [];   // one row per customer
+    const today = new Date();
+
+    /* ==========  HOOK UP  ========== */
     document.getElementById('fileInput').addEventListener('change', handleFile);
     document.getElementById('applyBtn').addEventListener('click', applyFilters);
 
-    /* ----------  EXCEL HANDLER  ---------- */
-    function handleFile(e){
+    /* ==========  FILE HANDLER  ========== */
+    function handleFile(e) {
       const file = e.target.files[0];
-      if(!file) return;
+      if (!file) return;
       document.getElementById('fileName').textContent = file.name;
 
       const reader = new FileReader();
-      reader.onload = evt=>{
-        const wb = XLSX.read(evt.target.result, {type:'binary'});
+      reader.onload = evt => {
+        localStorage.setItem('lastExcel', evt.target.result); // for details.html
+        const wb = XLSX.read(evt.target.result, { type: 'binary' });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        rawRows = XLSX.utils.sheet_to_json(ws, {defval:''});
+        rawRows = XLSX.utils.sheet_to_json(ws, { defval: '' });
         aggregate();
         populateDropdowns();
         applyFilters();
@@ -118,84 +106,87 @@
       reader.readAsBinaryString(file);
     }
 
-    /* ----------  AGGREGATE ORDERS  ---------- */
-    function aggregate(){
-      const map = {};
-      rawRows.forEach(r=>{
-        const phone = (r['Account Phones']||'').toString().trim();
-        if(!phone) return;                       // skip rows without phone
-        const key = phone;                       // roll-up per phone only
-        if(!map[key]) map[key] = {
-          phone : phone,
-          name  : r['Account Name']||'—',
-          orders: [],
-          total : 0
-        };
-        const amt = parseFloat(r['Total Price'])||0;
-        const dat = new Date(r['Created']||r['OrderDate']||'');
-        map[key].orders.push({date:dat, value:amt, rest:r['Resturant']||r['Restaurant']||'', pay:r['Payment Method']||''});
-        map[key].total += amt;
+    /* ==========  AGGREGATE  ========== */
+    function aggregate() {
+      const map = {}; // phone → {name, phone, orders:[], total}
+
+      rawRows.forEach(r => {
+        const phone = (r[COL_PHONE] || '').toString().trim();
+        if (!phone) return; // skip blanks
+
+        if (!map[phone]) {
+          map[phone] = { name: r[COL_NAME] || '—', phone, orders: [], total: 0 };
+        }
+
+        const amt = parseFloat(r[COL_TOTAL]) || 0;
+        const date = new Date(r[COL_DATE]) || '';
+        const rest = r[COL_REST] || '';
+
+        map[phone].orders.push({ date, value: amt, rest });
+        map[phone].total += amt;
       });
 
-      aggData = Object.values(map).map(x=>{
-        x.orders.sort((a,b)=>a.date-b.date);
-        const last = x.orders[x.orders.length-1].date;
-        const days = Math.floor((today - last)/864e5);
-        return{
-          phone     : x.phone,
-          name      : x.name,
-          orders    : x.orders.length,
+      aggData = Object.values(map).map(x => {
+        x.orders.sort((a, b) => a.date - b.date);
+        const last = x.orders[x.orders.length - 1].date;
+        const days = Math.floor((today - last) / 864e5);
+        return {
+          phone: x.phone,
+          name: x.name,
+          orders: x.orders.length,
           totalSpent: x.total,
-          avgSpent  : x.total/x.orders.length,
-          lastOrder : last,
-          daysAgo   : days,
-          year      : last.getFullYear(),
-          orderList : x.orders
+          avgSpent: x.total / x.orders.length,
+          lastOrder: last,
+          daysAgo: days,
+          year: last.getFullYear(),
+          orderList: x.orders
         };
       });
     }
 
-    /* ----------  DROP-DOWNS  ---------- */
-    function populateDropdowns(){
-      const rests=['All', ...new Set(rawRows.map(r=>r['Resturant']||r['Restaurant']||'').filter(v=>v))].sort();
-      const years=['All', ...new Set(aggData.map(x=>x.year))].sort((a,b)=>b-a);
-      document.getElementById('restFilter').innerHTML = rests.map(r=>`<option>${r}</option>`).join('');
-      document.getElementById('yearFilter').innerHTML = years.map(y=>`<option>${y}</option>`).join('');
+    /* ==========  DROP-DOWNS  ========== */
+    function populateDropdowns() {
+      const rests = ['All', ...new Set(rawRows.map(r => r[COL_REST] || '').filter(Boolean))].sort();
+      const years = ['All', ...new Set(aggData.map(x => x.year))].sort((a, b) => b - a);
+
+      document.getElementById('restFilter').innerHTML = rests.map(v => `<option>${v}</option>`).join('');
+      document.getElementById('yearFilter').innerHTML = years.map(v => `<option>${v}</option>`).join('');
     }
 
-    /* ----------  FILTER & DRAW  ---------- */
-    function applyFilters(){
+    /* ==========  FILTER  ========== */
+    function applyFilters() {
       const restSel  = document.getElementById('restFilter').value;
       const yearSel  = document.getElementById('yearFilter').value;
-      const avgMin   = parseFloat(document.getElementById('avgMin').value)||0;
-      const avgMax   = parseFloat(document.getElementById('avgMax').value)||Infinity;
-      const totMin   = parseFloat(document.getElementById('totMin').value)||0;
-      const totMax   = parseFloat(document.getElementById('totMax').value)||Infinity;
-      const lastMin  = parseInt(document.getElementById('lastMin').value)||0;
-      const lastMax  = parseInt(document.getElementById('lastMax').value)||Infinity;
-      const ordMin   = parseInt(document.getElementById('ordMin').value)||0;
-      const ordMax   = parseInt(document.getElementById('ordMax').value)||Infinity;
+      const avgMin   = parseFloat(document.getElementById('avgMin').value) || 0;
+      const avgMax   = parseFloat(document.getElementById('avgMax').value) || Infinity;
+      const totMin   = parseFloat(document.getElementById('totMin').value) || 0;
+      const totMax   = parseFloat(document.getElementById('totMax').value) || Infinity;
+      const lastMin  = parseInt(document.getElementById('lastMin').value) || 0;
+      const lastMax  = parseInt(document.getElementById('lastMax').value) || Infinity;
+      const ordMin   = parseInt(document.getElementById('ordMin').value) || 0;
+      const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
       const lostOnly = document.getElementById('lostOnly').checked;
 
-      let list = aggData.filter(x=>
-        (restSel==='All' || x.orderList.some(o=>o.rest===restSel)) &&
-        (yearSel==='All' || x.year===parseInt(yearSel)) &&
-        x.avgSpent>=avgMin && x.avgSpent<=avgMax &&
-        x.totalSpent>=totMin && x.totalSpent<=totMax &&
-        x.daysAgo>=lastMin && x.daysAgo<=lastMax &&
-        x.orders>=ordMin && x.orders<=ordMax &&
-        (!lostOnly || x.daysAgo>90)
+      let out = aggData.filter(x =>
+        (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
+        (yearSel === 'All' || x.year === parseInt(yearSel)) &&
+        x.avgSpent >= avgMin && x.avgSpent <= avgMax &&
+        x.totalSpent >= totMin && x.totalSpent <= totMax &&
+        x.daysAgo >= lastMin && x.daysAgo <= lastMax &&
+        x.orders >= ordMin && x.orders <= ordMax &&
+        (!lostOnly || x.daysAgo > 90)
       );
-      list.sort((a,b)=>b.orders-a.orders);
-      drawTable(list);
+      out.sort((a, b) => b.orders - a.orders);
+      drawTable(out);
     }
 
-    function drawTable(data){
-      const tb=document.querySelector('#mainTable tbody');
-      tb.innerHTML='';
-      data.forEach(r=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
+    /* ==========  DRAW TABLE  ========== */
+    function drawTable(data) {
+      const tbody = document.querySelector('#mainTable tbody');
+      tbody.innerHTML = '';
+      data.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
           <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
           <td>${r.name}</td>
           <td>${r.orders}</td>
@@ -203,9 +194,9 @@
           <td>${r.avgSpent.toFixed(2)}</td>
           <td>${r.lastOrder.toLocaleDateString()}</td>
           <td>${r.daysAgo}</td>`;
-        tb.appendChild(tr);
+        tbody.appendChild(tr);
       });
-      document.getElementById('stats').textContent=`Showing ${data.length} phones`;
+      document.getElementById('stats').textContent = `Showing ${data.length} phones`;
     }
   </script>
 </body>
