@@ -25,7 +25,7 @@
   </table>
 
   <script>
-    /* ----  config same as index  ---- */
+    /* =====  same column names as dashboard  ===== */
     const COL_PHONE = 'Account Phones';
     const COL_NAME  = 'Account Name';
     const COL_TOTAL = 'Total Price';
@@ -64,7 +64,7 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${new Date(r[COL_DATE] || '').toLocaleDateString()}</td>
-        <td>${r[COL_REST] || ''}</td>
+        <td>${r[COL_REST] || r['Restaurant'] || ''}</td>
         <td>${r[COL_PAY]  || ''}</td>
         <td>${parseFloat(r[COL_TOTAL] || 0).toFixed(2)}</td>`;
       tb.appendChild(tr);
