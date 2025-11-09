@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <title>Client Detail</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
   <style>
     body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
     h2{margin-top:0}
@@ -24,49 +25,51 @@
   </table>
 
   <script>
-    const DATA_URL = 'https://raw.githubusercontent.com/aladdinswelam-byte/customer-dashboard/main/data.json';
-    const wanted   = new URLSearchParams(location.search).get('phone')?.trim();
+    /* ----------  READ PHONE FROM QUERY-STRING  ---------- */
+    const wanted = new URLSearchParams(location.search).get('phone')?.trim();
+    if(!wanted){document.body.innerHTML='<h2>No phone supplied</h2>'; throw 0;}
 
-    fetch(DATA_URL)
-      .then(r=>r.json())
-      .then(allData=>{
-        /* ----  normalise phone on BOTH sides  ---- */
-        const rows = allData.filter(r=>{
-          const ph = (r['Account Phones']||r['Phone']||'').toString().trim();
-          return ph === wanted;
-        });
+    /* ----------  GRAB THE SAME EXCEL FILE FROM LOCAL-STORAGE  ---------- */
+    /* (index.html stores the file so we don’t ask twice)                */
+    const fileData = localStorage.getItem('lastExcel');
+    if(!fileData){document.body.innerHTML='<h2>Please start from the dashboard and upload the Excel file first.</h2>'; throw 0;}
 
-        if (!rows.length){document.body.innerHTML='<h2>No data for phone '+wanted+'</h2>';return;}
+    /* ----------  PARSE EXCEL  ---------- */
+    const wb = XLSX.read(fileData, {type:'binary'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
 
-        const name  = rows[0]['Account Name']||'—';
-        const total = rows.reduce((s,r)=>s+parseFloat(r['Total Price']||0),0);
-        const avg   = total/rows.length||0;
+    /* ----------  FILTER & DISPLAY  ---------- */
+    const custRows = rows.filter(r=>
+      (r['Account Phones']||'').toString().trim() === wanted
+    );
 
-        /* ----  weekly frequency  ---- */
-        const dates = rows.map(r=>new Date(r['Created']||r['OrderDate']||r['Created Date']||'')).sort((a,b)=>a-b);
-        const daysSpan = (dates[dates.length-1] - dates[0]) / (1000*60*60*24) || 1;
-        const ordersPerWeek = (rows.length / daysSpan) * 7;
-        const weeklyText = ordersPerWeek < 1 ? 'Less than 1× per week' : `≈ ${ordersPerWeek.toFixed(1)}× per week`;
+    if(!custRows.length){document.body.innerHTML=`<h2>No data for phone ${wanted}</h2>`; throw 0;}
 
-        document.getElementById('title').textContent   = `Client: ${name} – Phone: ${wanted}`;
-        document.getElementById('summary').textContent = `Total order sum: ${total.toFixed(2)} | Average per order: ${avg.toFixed(2)} | Orders: ${rows.length}`;
-        document.getElementById('metrics').innerHTML   = `<span class="badge">${weeklyText}</span>`;
+    const name  = custRows[0]['Account Name']||'—';
+    const total = custRows.reduce((s,r)=>s+parseFloat(r['Total Price']||0),0);
+    const avg   = total/custRows.length||0;
 
-        const tb = document.querySelector('#detailTable tbody');
-        rows.forEach(r=>{
-          const tr=document.createElement('tr');
-          tr.innerHTML=`
-            <td>${new Date(r['Created']||r['OrderDate']||r['Created Date']||'').toLocaleDateString()}</td>
-            <td>${r['Resturant']||r['Restaurant']||''}</td>
-            <td>${r['Payment Method']||''}</td>
-            <td>${parseFloat(r['Total Price']||0).toFixed(2)}</td>`;
-          tb.appendChild(tr);
-        });
-      })
-      .catch(err=>{
-        document.body.innerHTML='<h2>Error loading data</h2>';
-        console.error(err);
-      });
+    /* weekly frequency */
+    const dates = custRows.map(r=>new Date(r['Created']||r['OrderDate']||'')).sort((a,b)=>a-b);
+    const daysSpan = (dates[dates.length-1]-dates[0])/(864e5)||1;
+    const ordersPerWeek = (custRows.length/daysSpan)*7;
+    const weeklyText = ordersPerWeek<1 ? 'Less than 1× per week' : `≈ ${ordersPerWeek.toFixed(1)}× per week`;
+
+    document.getElementById('title').textContent   = `Client: ${name} – Phone: ${wanted}`;
+    document.getElementById('summary').textContent = `Total order sum: ${total.toFixed(2)} | Average per order: ${avg.toFixed(2)} | Orders: ${custRows.length}`;
+    document.getElementById('metrics').innerHTML   = `<span class="badge">${weeklyText}</span>`;
+
+    const tb = document.querySelector('#detailTable tbody');
+    custRows.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${new Date(r['Created']||r['OrderDate']||'').toLocaleDateString()}</td>
+        <td>${r['Resturant']||r['Restaurant']||''}</td>
+        <td>${r['Payment Method']||''}</td>
+        <td>${parseFloat(r['Total Price']||0).toFixed(2)}</td>`;
+      tb.appendChild(tr);
+    });
   </script>
 </body>
 </html>
