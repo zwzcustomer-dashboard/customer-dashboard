@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Complaint Detail</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
+    h2{margin-top:0}
+    .badge{background:#e91e63;color:#fff;padding:.3rem .6rem;border-radius:4px;font-size:.9rem}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+    th,td{padding:.6rem;text-align:left}
+    th{background:#e91e63;color:#fff}
+    tr:nth-child(even){background:#f2f2f2}
+  </style>
+</head>
+<body>
+  <h2 id="title"></h2>
+  <p id="summary"></p>
+  <table id="complaintTable">
+    <thead><tr><th>Date</th><th>Category</th><th>Details</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+const wanted = new URLSearchParams(location.search).get('phone')?.trim();
+if (!wanted) { document.body.innerHTML = '<h2>No phone supplied</h2>'; throw 0; }
+
+fetch('complaints.json')
+  .then(r => r.json())
+  .then(rows => {
+    const list = rows.filter(c => c.phone === wanted);
+    if (!list.length) {
+      document.body.innerHTML = `<h2>No complaints for phone ${wanted}</h2>`;
+      throw 0;
+    }
+    document.getElementById('title').textContent = `Complaints for ${wanted}`;
+    document.getElementById('summary').textContent = `Total complaints: ${list.length}`;
+
+    const tb = document.querySelector('#complaintTable tbody');
+    list
+      .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
+      .forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(c.date || '').toLocaleDateString()}</td>
+          <td>${c.category || ''}</td>
+          <td>${c.details || ''}</td>`;
+        tb.appendChild(tr);
+      });
+  })
+  .catch(err => {
+    console.error(err);
+    document.body.innerHTML = '<h2>Error loading complaints.json</h2>';
+  });
+</script>
+</body>
+</html>
