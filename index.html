@@ -52,6 +52,7 @@
         <option value="quality of food">quality of food</option>
       </select>
     </label>
+    <label>Complaints ≥ <input type="number" id="compMin" placeholder="0" min="0"></label>
   </div>
 
   <div id="stats"></div>
@@ -84,14 +85,10 @@ Promise.all([
   fetch('complaints.json').then(r => r.json())
 ])
 .then(([dataRows, compRows]) => {
-  /* --- normalise phones --- */
   rawRows    = dataRows.map(r => ({...r, [COL_PHONE]: (r[COL_PHONE] || '').toString().trim()}));
   complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
-
-  /* --- DEBUG: print first 5 phones each side --- */
   console.log('data phones  :', [...new Set(rawRows.map(r=>r[COL_PHONE]))].slice(0,5));
   console.log('compl phones :', [...new Set(complaints.map(c=>c.phone))].slice(0,5));
-
   aggregate();
   populateDropdowns();
   applyFilters();
@@ -152,7 +149,7 @@ function populateDropdowns() {
 }
 
 /* ----------  LIVE FILTERS  ---------- */
-['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','lostOnly','complaintKeyword']
+['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','lostOnly','complaintKeyword','compMin']
   .forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
 
 function applyFilters() {
@@ -168,6 +165,7 @@ function applyFilters() {
   const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
   const lostOnly = document.getElementById('lostOnly').checked;
   const keyword  = document.getElementById('complaintKeyword').value.trim().toLowerCase();
+  const compMin  = parseInt(document.getElementById('compMin').value) || 0;
 
   let list = aggData.filter(x =>
     (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
@@ -180,7 +178,8 @@ function applyFilters() {
     (!keyword || complaints.some(c => c.phone === x.phone && (
       (c.details   || '').toLowerCase().includes(keyword) ||
       (c.category  || '').toLowerCase().includes(keyword)
-    )))
+    ))) &&
+    x.complaintCount >= compMin
   );
   list.sort((a, b) => b.orders - a.orders);
   drawTable(list);
