@@ -4,13 +4,13 @@
   <meta charset="utf-8"/>
   <title>Restaurant Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- =====  SheetJS  ===== -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
+  <!-- =====  LOCAL SheetJS  ===== -->
+  <script src="xlsx.full.min.js"></script>
 
   <style>
     body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
     h1{text-align:center;margin-top:0}
-    .upload-box{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;font-size:.9rem}
+    .upload-box{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;font-size:.9rem;flex-wrap:wrap}
     .upload-box #fileName{color:#555;font-weight:500}
     #status{margin-bottom:.5rem;font-weight:500}
     .controls{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1rem;background:#fff;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
@@ -33,8 +33,8 @@
 
   <!-- =====  FILE INPUT  ===== -->
   <div class="upload-box">
-    <label><strong>1.</strong> Pick Excel file:
-      <input type="file" id="fileInput" accept=".xlsx,.xls"/>
+    <label><strong>1.</strong> Pick Excel file(s):
+      <input type="file" id="fileInput" accept=".xlsx,.xls" multiple>
     </label>
     <span id="fileName"></span>
   </div>
@@ -67,12 +67,12 @@
   </table>
 
   <script>
-    /* =====  CONFIG  ===== */
+    /* =====  CONFIG  (YOUR EXACT HEADERS)  ===== */
     const COL_PHONE = 'Account Phones';
     const COL_NAME  = 'Account Name';
     const COL_TOTAL = 'Total Price';
     const COL_DATE  = 'Created';
-    const COL_REST  = 'Resturant';
+    const COL_REST  = 'Resturant';   // keeping your typo
 
     let rawRows = [];
     let aggData = [];
@@ -82,7 +82,7 @@
     document.getElementById('fileInput').addEventListener('change', e => handleFileList(e.target.files));
     document.getElementById('applyBtn').addEventListener('click', applyFilters);
 
-    /* =====  FILE INPUT (single or folder)  ===== */
+    /* =====  FILE INPUT  ===== */
     function handleFileList(fileList) {
       const files = [...fileList].filter(f => f.name.match(/\.xlsx?$/i));
       if (!files.length) return setStatus('No Excel files selected.', 'red');
@@ -90,46 +90,43 @@
       readMultiple(files);
     }
 
-    /* --- folder button --- */
-    const folderBtn = document.createElement('button');
-    folderBtn.textContent = '📁 Pick a folder';
-    folderBtn.style.marginLeft = '.5rem';
-    folderBtn.addEventListener('click', () => {
-      const inp = document.createElement('input');
-      inp.type = 'file';
-      inp.webkitdirectory = true;
-      inp.accept = '.xlsx,.xls';
-      inp.addEventListener('change', e => handleFileList(e.target.files));
-      inp.click();
-    });
-    if (!('webkitdirectory' in document.createElement('input'))) folderBtn.style.display = 'none';
-    document.querySelector('.upload-box').appendChild(folderBtn);
-
-    /* =====  READ FILES  ===== */
+    /* =====  BULLET-PROOF MULTI-FILE READER  ===== */
     async function readMultiple(files) {
       const allRows = [];
+      let okFiles = 0;
+
       for (const file of files) {
         try {
-          const buf  = await file.arrayBuffer();
-          const wb   = XLSX.read(buf, { type: 'array' });
-          const ws   = wb.Sheets[wb.SheetNames[0]];
+          const buf = await file.arrayBuffer();
+          const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+          const ws = wb.Sheets[wb.SheetNames[0]];
           const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+          if (!json.length) {
+            console.warn(`Skipped empty sheet: ${file.name}`);
+            continue;
+          }
           allRows.push(...json);
+          okFiles++;
         } catch (e) {
-          console.error('Error reading', file.name, e);
-          setStatus(`Error reading ${file.name}`, 'red');
-          return;
+          console.warn(`Skipping unreadable file: ${file.name}`, e);
         }
       }
+
+      if (!allRows.length) {
+        setStatus('No usable data found in any file.', 'red');
+        return;
+      }
+
       rawRows = allRows;
-      document.getElementById('fileName').textContent = `${files.length} file(s) loaded`;
+      document.getElementById('fileName').textContent = `${okFiles} / ${files.length} file(s) loaded`;
       aggregate();
       populateDropdowns();
       applyFilters();
       setStatus('Ready.', 'green');
     }
 
-    /* =====  STATUS  ===== */
+    /* =====  STATUS HELPER  ===== */
     function setStatus(msg, color = 'black') {
       let s = document.getElementById('status');
       if (!s) { s = document.createElement('div'); s.id = 'status'; document.querySelector('.upload-box').after(s); }
@@ -146,7 +143,7 @@
         if (!map[phone]) map[phone] = { phone, name: r[COL_NAME] || '—', orders: [], total: 0 };
         const amt  = parseFloat(r[COL_TOTAL]) || 0;
         const date = new Date(r[COL_DATE] || '');
-        const rest = r[COL_REST] || r['Restaurant'] || '';
+        const rest = r[COL_REST] || '';
         map[phone].orders.push({ date, value: amt, rest });
         map[phone].total += amt;
       });
@@ -171,7 +168,7 @@
 
     /* =====  DROPDOWNS  ===== */
     function populateDropdowns() {
-      const rests = ['All', ...new Set(rawRows.map(r => r[COL_REST] || r['Restaurant'] || '').filter(Boolean))].sort();
+      const rests = ['All', ...new Set(rawRows.map(r => r[COL_REST] || '').filter(Boolean))].sort();
       const years = ['All', ...new Set(aggData.map(x => x.year))].sort((a, b) => b - a);
       document.getElementById('restFilter').innerHTML = rests.map(r => `<option>${r}</option>`).join('');
       document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
@@ -191,7 +188,7 @@
       const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
       const lostOnly = document.getElementById('lostOnly').checked;
 
-      let list = aggData.filter(x =>
+      const list = aggData.filter(x =>
         (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
         (yearSel === 'All' || x.year === parseInt(yearSel)) &&
         x.avgSpent >= avgMin && x.avgSpent <= avgMax &&
@@ -199,8 +196,8 @@
         x.daysAgo >= lastMin && x.daysAgo <= lastMax &&
         x.orders >= ordMin && x.orders <= ordMax &&
         (!lostOnly || x.daysAgo > 90)
-      );
-      list.sort((a, b) => b.orders - a.orders);
+      ).sort((a, b) => b.orders - a.orders);
+
       drawTable(list);
     }
 
