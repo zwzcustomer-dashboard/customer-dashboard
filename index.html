@@ -78,14 +78,20 @@ let aggData    = [];
 let complaints = [];
 const today    = new Date();
 
-/* ----------  LOAD JSON + NORMALISE PHONES  ---------- */
+/* ----------  LOAD + NORMALISE + DEBUG  ---------- */
 Promise.all([
   fetch('data.json').then(r => r.json()),
   fetch('complaints.json').then(r => r.json())
 ])
 .then(([dataRows, compRows]) => {
+  /* --- normalise phones --- */
   rawRows    = dataRows.map(r => ({...r, [COL_PHONE]: (r[COL_PHONE] || '').toString().trim()}));
   complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
+
+  /* --- DEBUG: print first 5 phones each side --- */
+  console.log('data phones  :', [...new Set(rawRows.map(r=>r[COL_PHONE]))].slice(0,5));
+  console.log('compl phones :', [...new Set(complaints.map(c=>c.phone))].slice(0,5));
+
   aggregate();
   populateDropdowns();
   applyFilters();
