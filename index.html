@@ -4,20 +4,13 @@
   <meta charset="utf-8"/>
   <title>Restaurant Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <!-- SheetJS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
-
   <style>
     body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
     h1{text-align:center;margin-top:0}
-    .upload-box{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem;font-size:.9rem}
-    .upload-box #fileName{color:#555;font-weight:500}
     #status{margin-bottom:.5rem;font-weight:500}
     .controls{display:flex;flex-wrap:wrap;gap:.7rem;margin-bottom:1rem;background:#fff;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
     .controls label{display:flex;flex-direction:column;font-size:.9rem}
     .controls input,.controls select{padding:.4rem;border:1px solid #bbb;border-radius:4px}
-    button{background:#1976d2;color:#fff;border:none;padding:.6rem 1.2rem;border-radius:4px;cursor:pointer;font-weight:500}
-    button:hover{background:#1565c0}
     #stats{margin-bottom:.5rem;font-weight:500}
     table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,.1)}
     th,td{padding:.6rem;text-align:left}
@@ -25,21 +18,13 @@
     tr:nth-child(even){background:#f2f2f2}
     a{color:#1976d2;text-decoration:none}
     a:hover{text-decoration:underline}
-    @media(max-width:700px){body{padding:.5rem} .controls{flex-direction:column} .upload-box{flex-direction:column;align-items:flex-start}}
+    @media(max-width:700px){body{padding:.5rem} .controls{flex-direction:column}}
   </style>
 </head>
 <body>
   <h1>Restaurant Dashboard</h1>
+  <div id="status">Loading data…</div>
 
-  <!-- =====  FILE INPUT  ===== -->
-  <div class="upload-box">
-    <label><strong>1.</strong> Pick Excel file:
-      <input type="file" id="fileInput" accept=".xlsx,.xls"/>
-    </label>
-    <span id="fileName"></span>
-  </div>
-
-  <!-- =====  FILTERS  ===== -->
   <div class="controls">
     <label>Restaurant  <select id="restFilter"><option>All</option></select></label>
     <label>Year        <select id="yearFilter"><option>All</option></select></label>
@@ -52,7 +37,6 @@
     <label>Orders ≥  <input type="number" id="ordMin" placeholder="0"></label>
     <label>Orders ≤  <input type="number" id="ordMax"></label>
     <label><input type="checkbox" id="lostOnly"> Lost customers only (90+ days)</label>
-    <button id="applyBtn">Apply filters</button>
   </div>
 
   <div id="stats"></div>
@@ -66,161 +50,127 @@
     <tbody></tbody>
   </table>
 
-  <script>
-    /* =====  CONFIG  ===== */
-    const COL_PHONE = 'Account Phones';
-    const COL_NAME  = 'Account Name';
-    const COL_TOTAL = 'Total Price';
-    const COL_DATE  = 'Created';
-    const COL_REST  = 'Resturant';
+<script>
+/* ----------  CONFIG  ---------- */
+const COL_PHONE = 'Account Phones';
+const COL_NAME  = 'Account Name';
+const COL_TOTAL = 'Total Price';
+const COL_DATE  = 'Created';
+const COL_REST  = 'Resturant';
 
-    let rawRows = [];
-    let aggData = [];
-    const today = new Date();
+let rawRows = [];
+let aggData = [];
+const today = new Date();
 
-    /* =====  HOOK UP  ===== */
-    document.getElementById('fileInput').addEventListener('change', e => handleFileList(e.target.files));
-    document.getElementById('applyBtn').addEventListener('click', applyFilters);
+/* ----------  LOAD STATIC JSON  ---------- */
+fetch('data.json')
+  .then(r => r.json())
+  .then(j => {
+    rawRows = j;
+    aggregate();
+    populateDropdowns();
+    applyFilters();
+    setStatus('Ready.', 'green');
+  })
+  .catch(err => {
+    console.error(err);
+    setStatus('Could not load data.json', 'red');
+  });
 
-    /* =====  FILE INPUT (single or folder)  ===== */
-    function handleFileList(fileList) {
-      const files = [...fileList].filter(f => f.name.match(/\.xlsx?$/i));
-      if (!files.length) return setStatus('No Excel files selected.', 'red');
-      setStatus('Reading …', 'orange');
-      readMultiple(files);
-    }
+/* ----------  STATUS  ---------- */
+function setStatus(msg, color = 'black') {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.style.color = color;
+}
 
-    /* --- folder button --- */
-    const folderBtn = document.createElement('button');
-    folderBtn.textContent = '📁 Pick a folder';
-    folderBtn.style.marginLeft = '.5rem';
-    folderBtn.addEventListener('click', () => {
-      const inp = document.createElement('input');
-      inp.type = 'file';
-      inp.webkitdirectory = true;
-      inp.accept = '.xlsx,.xls';
-      inp.addEventListener('change', e => handleFileList(e.target.files));
-      inp.click();
-    });
-    if (!('webkitdirectory' in document.createElement('input'))) folderBtn.style.display = 'none';
-    document.querySelector('.upload-box').appendChild(folderBtn);
+/* ----------  AGGREGATE  ---------- */
+function aggregate() {
+  const map = {};
+  rawRows.forEach(r => {
+    const phone = (r[COL_PHONE] || '').toString().trim();
+    if (!phone) return;
+    if (!map[phone]) map[phone] = { phone, name: r[COL_NAME] || '—', orders: [], total: 0 };
+    const amt  = parseFloat(r[COL_TOTAL]) || 0;
+    const date = new Date(r[COL_DATE] || '');
+    const rest = r[COL_REST] || r['Restaurant'] || '';
+    map[phone].orders.push({ date, value: amt, rest });
+    map[phone].total += amt;
+  });
 
-    /* =====  READ FILES  ===== */
-    async function readMultiple(files) {
-      const allRows = [];
-      for (const file of files) {
-        try {
-          const buf  = await file.arrayBuffer();
-          const wb   = XLSX.read(buf, { type: 'array' });
-          const ws   = wb.Sheets[wb.SheetNames[0]];
-          const json = XLSX.utils.sheet_to_json(ws, { defval: '' });
-          allRows.push(...json);
-        } catch (e) {
-          console.error('Error reading', file.name, e);
-          setStatus(`Error reading ${file.name}`, 'red');
-          return;
-        }
-      }
-      rawRows = allRows;
-      document.getElementById('fileName').textContent = `${files.length} file(s) loaded`;
-      aggregate();
-      populateDropdowns();
-      applyFilters();
-      setStatus('Ready.', 'green');
-    }
+  aggData = Object.values(map).map(x => {
+    x.orders.sort((a, b) => a.date - b.date);
+    const last = x.orders[x.orders.length - 1].date;
+    const days = Math.floor((today - last) / 864e5);
+    return {
+      phone: x.phone,
+      name: x.name,
+      orders: x.orders.length,
+      totalSpent: x.total,
+      avgSpent: x.total / x.orders.length,
+      lastOrder: last,
+      daysAgo: days,
+      year: last.getFullYear(),
+      orderList: x.orders
+    };
+  });
+}
 
-    /* =====  STATUS  ===== */
-    function setStatus(msg, color = 'black') {
-      let s = document.getElementById('status');
-      if (!s) { s = document.createElement('div'); s.id = 'status'; document.querySelector('.upload-box').after(s); }
-      s.textContent = msg;
-      s.style.color = color;
-    }
+/* ----------  DROPDOWNS  ---------- */
+function populateDropdowns() {
+  const rests = ['All', ...new Set(rawRows.map(r => r[COL_REST] || r['Restaurant'] || '').filter(Boolean))].sort();
+  const years = ['All', ...new Set(aggData.map(x => x.year))].sort((a, b) => b - a);
+  document.getElementById('restFilter').innerHTML = rests.map(r => `<option>${r}</option>`).join('');
+  document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
+}
 
-    /* =====  AGGREGATE  ===== */
-    function aggregate() {
-      const map = {};
-      rawRows.forEach(r => {
-        const phone = (r[COL_PHONE] || '').toString().trim();
-        if (!phone) return;
-        if (!map[phone]) map[phone] = { phone, name: r[COL_NAME] || '—', orders: [], total: 0 };
-        const amt  = parseFloat(r[COL_TOTAL]) || 0;
-        const date = new Date(r[COL_DATE] || '');
-        const rest = r[COL_REST] || r['Restaurant'] || '';
-        map[phone].orders.push({ date, value: amt, rest });
-        map[phone].total += amt;
-      });
+/* ----------  FILTER  (auto-runs on every change)  ---------- */
+['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','lostOnly']
+  .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
 
-      aggData = Object.values(map).map(x => {
-        x.orders.sort((a, b) => a.date - b.date);
-        const last = x.orders[x.orders.length - 1].date;
-        const days = Math.floor((today - last) / 864e5);
-        return {
-          phone: x.phone,
-          name: x.name,
-          orders: x.orders.length,
-          totalSpent: x.total,
-          avgSpent: x.total / x.orders.length,
-          lastOrder: last,
-          daysAgo: days,
-          year: last.getFullYear(),
-          orderList: x.orders
-        };
-      });
-    }
+function applyFilters() {
+  const restSel  = document.getElementById('restFilter').value;
+  const yearSel  = document.getElementById('yearFilter').value;
+  const avgMin   = parseFloat(document.getElementById('avgMin').value) || 0;
+  const avgMax   = parseFloat(document.getElementById('avgMax').value) || Infinity;
+  const totMin   = parseFloat(document.getElementById('totMin').value) || 0;
+  const totMax   = parseFloat(document.getElementById('totMax').value) || Infinity;
+  const lastMin  = parseInt(document.getElementById('lastMin').value) || 0;
+  const lastMax  = parseInt(document.getElementById('lastMax').value) || Infinity;
+  const ordMin   = parseInt(document.getElementById('ordMin').value) || 0;
+  const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
+  const lostOnly = document.getElementById('lostOnly').checked;
 
-    /* =====  DROPDOWNS  ===== */
-    function populateDropdowns() {
-      const rests = ['All', ...new Set(rawRows.map(r => r[COL_REST] || r['Restaurant'] || '').filter(Boolean))].sort();
-      const years = ['All', ...new Set(aggData.map(x => x.year))].sort((a, b) => b - a);
-      document.getElementById('restFilter').innerHTML = rests.map(r => `<option>${r}</option>`).join('');
-      document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
-    }
+  let list = aggData.filter(x =>
+    (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
+    (yearSel === 'All' || x.year === parseInt(yearSel)) &&
+    x.avgSpent >= avgMin && x.avgSpent <= avgMax &&
+    x.totalSpent >= totMin && x.totalSpent <= totMax &&
+    x.daysAgo >= lastMin && x.daysAgo <= lastMax &&
+    x.orders >= ordMin && x.orders <= ordMax &&
+    (!lostOnly || x.daysAgo > 90)
+  );
+  list.sort((a, b) => b.orders - a.orders);
+  drawTable(list);
+}
 
-    /* =====  FILTER & DRAW  ===== */
-    function applyFilters() {
-      const restSel  = document.getElementById('restFilter').value;
-      const yearSel  = document.getElementById('yearFilter').value;
-      const avgMin   = parseFloat(document.getElementById('avgMin').value) || 0;
-      const avgMax   = parseFloat(document.getElementById('avgMax').value) || Infinity;
-      const totMin   = parseFloat(document.getElementById('totMin').value) || 0;
-      const totMax   = parseFloat(document.getElementById('totMax').value) || Infinity;
-      const lastMin  = parseInt(document.getElementById('lastMin').value) || 0;
-      const lastMax  = parseInt(document.getElementById('lastMax').value) || Infinity;
-      const ordMin   = parseInt(document.getElementById('ordMin').value) || 0;
-      const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
-      const lostOnly = document.getElementById('lostOnly').checked;
-
-      let list = aggData.filter(x =>
-        (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
-        (yearSel === 'All' || x.year === parseInt(yearSel)) &&
-        x.avgSpent >= avgMin && x.avgSpent <= avgMax &&
-        x.totalSpent >= totMin && x.totalSpent <= totMax &&
-        x.daysAgo >= lastMin && x.daysAgo <= lastMax &&
-        x.orders >= ordMin && x.orders <= ordMax &&
-        (!lostOnly || x.daysAgo > 90)
-      );
-      list.sort((a, b) => b.orders - a.orders);
-      drawTable(list);
-    }
-
-    function drawTable(data) {
-      const tbody = document.querySelector('#mainTable tbody');
-      tbody.innerHTML = '';
-      data.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
-          <td>${r.name}</td>
-          <td>${r.orders}</td>
-          <td>${r.totalSpent.toFixed(2)}</td>
-          <td>${r.avgSpent.toFixed(2)}</td>
-          <td>${r.lastOrder.toLocaleDateString()}</td>
-          <td>${r.daysAgo}</td>`;
-        tbody.appendChild(tr);
-      });
-      document.getElementById('stats').textContent = `Showing ${data.length} phones`;
-    }
-  </script>
+function drawTable(data) {
+  const tbody = document.querySelector('#mainTable tbody');
+  tbody.innerHTML = '';
+  data.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
+      <td>${r.name}</td>
+      <td>${r.orders}</td>
+      <td>${r.totalSpent.toFixed(2)}</td>
+      <td>${r.avgSpent.toFixed(2)}</td>
+      <td>${r.lastOrder.toLocaleDateString()}</td>
+      <td>${r.daysAgo}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('stats').textContent = `Showing ${data.length} phones`;
+}
+</script>
 </body>
 </html>
