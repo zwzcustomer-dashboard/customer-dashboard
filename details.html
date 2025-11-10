@@ -4,7 +4,6 @@
   <meta charset="utf-8"/>
   <title>Client Detail</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
   <style>
     body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
     h2{margin-top:0}
@@ -19,57 +18,79 @@
   <h2 id="title"></h2>
   <p id="summary"></p>
   <p id="metrics"></p>
+
   <table id="detailTable">
-    <thead><tr><th>Date</th><th>Restaurant</th><th>Payment</th><th>Amount</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Date</th><th>Restaurant</th><th>Payment</th><th>Amount</th>
+      </tr>
+    </thead>
     <tbody></tbody>
   </table>
 
-  <script>
-    /* ----------  READ PHONE FROM QUERY-STRING  ---------- */
-    const wanted = new URLSearchParams(location.search).get('phone')?.trim();
-    if(!wanted){document.body.innerHTML='<h2>No phone supplied</h2>'; throw 0;}
+<script>
+/* ----------  HELPERS  ---------- */
+const COL_PHONE = 'Account Phones';
+const COL_NAME  = 'Account Name';
+const COL_TOTAL = 'Total Price';
+const COL_DATE  = 'Created';
+const COL_REST  = 'Resturant';
+const COL_PAY   = 'Payment Method';
 
-    /* ----------  GRAB THE SAME EXCEL FILE FROM LOCAL-STORAGE  ---------- */
-    /* (index.html stores the file so we don’t ask twice)                */
-    const fileData = localStorage.getItem('lastExcel');
-    if(!fileData){document.body.innerHTML='<h2>Please start from the dashboard and upload the Excel file first.</h2>'; throw 0;}
+/* ----------  GET PHONE  ---------- */
+const wanted = new URLSearchParams(location.search).get('phone')?.trim();
+if (!wanted) { document.body.innerHTML = '<h2>No phone supplied</h2>'; throw 0; }
 
-    /* ----------  PARSE EXCEL  ---------- */
-    const wb = XLSX.read(fileData, {type:'binary'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+/* ----------  LOAD JSON  ---------- */
+fetch('data.json')
+  .then(r => r.json())
+  .then(rows => render(rows))
+  .catch(err => {
+    console.error(err);
+    document.body.innerHTML = '<h2>Could not load data.json</h2>';
+  });
 
-    /* ----------  FILTER & DISPLAY  ---------- */
-    const custRows = rows.filter(r=>
-      (r['Account Phones']||'').toString().trim() === wanted
-    );
+/* ----------  RENDER  ---------- */
+function render(rows) {
+  const custRows = rows.filter(r =>
+    (r[COL_PHONE] || '').toString().trim() === wanted
+  );
 
-    if(!custRows.length){document.body.innerHTML=`<h2>No data for phone ${wanted}</h2>`; throw 0;}
+  if (!custRows.length) {
+    document.body.innerHTML = `<h2>No data for phone ${wanted}</h2>`;
+    throw 0;
+  }
 
-    const name  = custRows[0]['Account Name']||'—';
-    const total = custRows.reduce((s,r)=>s+parseFloat(r['Total Price']||0),0);
-    const avg   = total/custRows.length||0;
+  /* ---- summary ---- */
+  const name  = custRows[0][COL_NAME] || '—';
+  const total = custRows.reduce((s, r) => s + parseFloat(r[COL_TOTAL] || 0), 0);
+  const avg   = total / custRows.length || 0;
 
-    /* weekly frequency */
-    const dates = custRows.map(r=>new Date(r['Created']||r['OrderDate']||'')).sort((a,b)=>a-b);
-    const daysSpan = (dates[dates.length-1]-dates[0])/(864e5)||1;
-    const ordersPerWeek = (custRows.length/daysSpan)*7;
-    const weeklyText = ordersPerWeek<1 ? 'Less than 1× per week' : `≈ ${ordersPerWeek.toFixed(1)}× per week`;
+  /* ---- weekly freq ---- */
+  const dates = custRows.map(r => new Date(r[COL_DATE] || r['OrderDate'] || '')).sort((a, b) => a - b);
+  const daysSpan = (dates[dates.length - 1] - dates[0]) / 864e5 || 1;
+  const ordersPerWeek = (custRows.length / daysSpan) * 7;
+  const weeklyText = ordersPerWeek < 1 ? 'Less than 1× per week' : `≈ ${ordersPerWeek.toFixed(1)}× per week`;
 
-    document.getElementById('title').textContent   = `Client: ${name} – Phone: ${wanted}`;
-    document.getElementById('summary').textContent = `Total order sum: ${total.toFixed(2)} | Average per order: ${avg.toFixed(2)} | Orders: ${custRows.length}`;
-    document.getElementById('metrics').innerHTML   = `<span class="badge">${weeklyText}</span>`;
+  /* ---- DOM ---- */
+  document.getElementById('title').textContent   = `Client: ${name} – Phone: ${wanted}`;
+  document.getElementById('summary').textContent = `Total spent: ${total.toFixed(2)} | Average per order: ${avg.toFixed(2)} | Orders: ${custRows.length}`;
+  document.getElementById('metrics').innerHTML   = `<span class="badge">${weeklyText}</span>`;
 
-    const tb = document.querySelector('#detailTable tbody');
-    custRows.forEach(r=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${new Date(r['Created']||r['OrderDate']||'').toLocaleDateString()}</td>
-        <td>${r['Resturant']||r['Restaurant']||''}</td>
-        <td>${r['Payment Method']||''}</td>
-        <td>${parseFloat(r['Total Price']||0).toFixed(2)}</td>`;
+  /* ---- table ---- */
+  const tb = document.querySelector('#detailTable tbody');
+  custRows
+    .sort((a, b) => new Date(a[COL_DATE] || a['OrderDate'] || 0) - new Date(b[COL_DATE] || b['OrderDate'] || 0))
+    .forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${new Date(r[COL_DATE] || r['OrderDate'] || '').toLocaleDateString()}</td>
+        <td>${r[COL_REST] || r['Restaurant'] || ''}</td>
+        <td>${r[COL_PAY] || ''}</td>
+        <td>${parseFloat(r[COL_TOTAL] || 0).toFixed(2)}</td>`;
       tb.appendChild(tr);
     });
-  </script>
+}
+</script>
 </body>
 </html>
