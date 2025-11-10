@@ -37,6 +37,7 @@
     <label>Orders ≥  <input type="number" id="ordMin" placeholder="0"></label>
     <label>Orders ≤  <input type="number" id="ordMax"></label>
     <label><input type="checkbox" id="lostOnly"> Lost customers only (90+ days)</label>
+    <label>Complaint keyword <input type="text" id="complaintKeyword" placeholder="type keyword"></label>
   </div>
 
   <div id="stats"></div>
@@ -44,7 +45,7 @@
   <table id="mainTable">
     <thead>
       <tr>
-        <th>Phone</th><th>Account Name</th><th>Orders</th><th>Total</th><th>Avg</th><th>Last order</th><th>Days ago</th>
+        <th>Phone</th><th>Account Name</th><th>Orders</th><th>Total</th><th>Avg</th><th>Last order</th><th>Days ago</th><th>Complaints</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -58,24 +59,28 @@ const COL_TOTAL = 'Total Price';
 const COL_DATE  = 'Created';
 const COL_REST  = 'Resturant';
 
-let rawRows = [];
-let aggData = [];
-const today = new Date();
+let rawRows   = [];
+let aggData   = [];
+let complaints= [];            // all complaints
+const today   = new Date();
 
-/* ----------  LOAD STATIC JSON  ---------- */
-fetch('data.json')
-  .then(r => r.json())
-  .then(j => {
-    rawRows = j;
-    aggregate();
-    populateDropdowns();
-    applyFilters();
-    setStatus('Ready.', 'green');
-  })
-  .catch(err => {
-    console.error(err);
-    setStatus('Could not load data.json', 'red');
-  });
+/* ----------  LOAD DATA & COMPLAINTS  ---------- */
+Promise.all([
+  fetch('data.json').then(r => r.json()),
+  fetch('complaints.json').then(r => r.json())
+])
+.then(([dataRows, compRows]) => {
+  rawRows    = dataRows;
+  complaints = compRows;
+  aggregate();
+  populateDropdowns();
+  applyFilters();
+  setStatus('Ready.', 'green');
+})
+.catch(err => {
+  console.error(err);
+  setStatus('Error loading JSON files', 'red');
+});
 
 /* ----------  STATUS  ---------- */
 function setStatus(msg, color = 'black') {
@@ -102,6 +107,7 @@ function aggregate() {
     x.orders.sort((a, b) => a.date - b.date);
     const last = x.orders[x.orders.length - 1].date;
     const days = Math.floor((today - last) / 864e5);
+    const compCount = complaints.filter(c => c.phone === x.phone).length;
     return {
       phone: x.phone,
       name: x.name,
@@ -111,7 +117,8 @@ function aggregate() {
       lastOrder: last,
       daysAgo: days,
       year: last.getFullYear(),
-      orderList: x.orders
+      orderList: x.orders,
+      complaintCount: compCount
     };
   });
 }
@@ -124,9 +131,9 @@ function populateDropdowns() {
   document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
 }
 
-/* ----------  FILTER  (auto-runs on every change)  ---------- */
-['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','lostOnly']
-  .forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+/* ----------  FILTER  ---------- */
+['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','lostOnly','complaintKeyword']
+  .forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
 
 function applyFilters() {
   const restSel  = document.getElementById('restFilter').value;
@@ -140,6 +147,7 @@ function applyFilters() {
   const ordMin   = parseInt(document.getElementById('ordMin').value) || 0;
   const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
   const lostOnly = document.getElementById('lostOnly').checked;
+  const keyword  = document.getElementById('complaintKeyword').value.trim().toLowerCase();
 
   let list = aggData.filter(x =>
     (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
@@ -148,7 +156,11 @@ function applyFilters() {
     x.totalSpent >= totMin && x.totalSpent <= totMax &&
     x.daysAgo >= lastMin && x.daysAgo <= lastMax &&
     x.orders >= ordMin && x.orders <= ordMax &&
-    (!lostOnly || x.daysAgo > 90)
+    (!lostOnly || x.daysAgo > 90) &&
+    (!keyword || complaints.some(c => c.phone === x.phone && (
+      (c.details || '').toLowerCase().includes(keyword) ||
+      (c.category || '').toLowerCase().includes(keyword)
+    )))
   );
   list.sort((a, b) => b.orders - a.orders);
   drawTable(list);
@@ -166,7 +178,8 @@ function drawTable(data) {
       <td>${r.totalSpent.toFixed(2)}</td>
       <td>${r.avgSpent.toFixed(2)}</td>
       <td>${r.lastOrder.toLocaleDateString()}</td>
-      <td>${r.daysAgo}</td>`;
+      <td>${r.daysAgo}</td>
+      <td>${r.complaintCount > 0 ? `<a href="complaints.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.complaintCount}</a>` : 0}</td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('stats').textContent = `Showing ${data.length} phones`;
