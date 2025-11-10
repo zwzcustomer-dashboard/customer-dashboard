@@ -37,7 +37,21 @@
     <label>Orders ≥  <input type="number" id="ordMin" placeholder="0"></label>
     <label>Orders ≤  <input type="number" id="ordMax"></label>
     <label><input type="checkbox" id="lostOnly"> Lost customers only (90+ days)</label>
-    <label>Complaint keyword <input type="text" id="complaintKeyword" placeholder="type keyword"></label>
+    <label>Complaint
+      <select id="complaintKeyword">
+        <option value="">All</option>
+        <option value="call center">call center</option>
+        <option value="delay">delay</option>
+        <option value="delivery">delivery</option>
+        <option value="food safety and poisoning">food safety and poisoning</option>
+        <option value="food temperature">food temperature</option>
+        <option value="missing items">missing items</option>
+        <option value="other complaints">other complaints</option>
+        <option value="packaging">packaging</option>
+        <option value="portion">portion</option>
+        <option value="quality of food">quality of food</option>
+      </select>
+    </label>
   </div>
 
   <div id="stats"></div>
@@ -59,19 +73,19 @@ const COL_TOTAL = 'Total Price';
 const COL_DATE  = 'Created';
 const COL_REST  = 'Resturant';
 
-let rawRows   = [];
-let aggData   = [];
-let complaints= [];            // all complaints
-const today   = new Date();
+let rawRows    = [];
+let aggData    = [];
+let complaints = [];
+const today    = new Date();
 
-/* ----------  LOAD DATA & COMPLAINTS  ---------- */
+/* ----------  LOAD JSON + NORMALISE PHONES  ---------- */
 Promise.all([
   fetch('data.json').then(r => r.json()),
   fetch('complaints.json').then(r => r.json())
 ])
 .then(([dataRows, compRows]) => {
-  rawRows    = dataRows;
-  complaints = compRows;
+  rawRows    = dataRows.map(r => ({...r, [COL_PHONE]: (r[COL_PHONE] || '').toString().trim()}));
+  complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
   aggregate();
   populateDropdowns();
   applyFilters();
@@ -93,7 +107,7 @@ function setStatus(msg, color = 'black') {
 function aggregate() {
   const map = {};
   rawRows.forEach(r => {
-    const phone = (r[COL_PHONE] || '').toString().trim();
+    const phone = r[COL_PHONE];
     if (!phone) return;
     if (!map[phone]) map[phone] = { phone, name: r[COL_NAME] || '—', orders: [], total: 0 };
     const amt  = parseFloat(r[COL_TOTAL]) || 0;
@@ -131,7 +145,7 @@ function populateDropdowns() {
   document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
 }
 
-/* ----------  FILTER  ---------- */
+/* ----------  LIVE FILTERS  ---------- */
 ['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','lostOnly','complaintKeyword']
   .forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
 
@@ -158,8 +172,8 @@ function applyFilters() {
     x.orders >= ordMin && x.orders <= ordMax &&
     (!lostOnly || x.daysAgo > 90) &&
     (!keyword || complaints.some(c => c.phone === x.phone && (
-      (c.details || '').toLowerCase().includes(keyword) ||
-      (c.category || '').toLowerCase().includes(keyword)
+      (c.details   || '').toLowerCase().includes(keyword) ||
+      (c.category  || '').toLowerCase().includes(keyword)
     )))
   );
   list.sort((a, b) => b.orders - a.orders);
