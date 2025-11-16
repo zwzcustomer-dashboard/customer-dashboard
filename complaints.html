@@ -13,17 +13,24 @@
     th{background:#e91e63;color:#fff}
     tr:nth-child(even){background:#f2f2f2}
     .order-row{background:#e3f2fd;}
+    h3{margin:1.5rem 0 .5rem 0;font-size:1.1rem}
   </style>
 </head>
 <body>
   <h2 id="title"></h2>
   <p id="summary"></p>
+
+  <!-- NEW: orders that happened on complaint date(s) -->
+  <h3>Order(s) on complaint date(s)</h3>
+  <table id="orderTable">
+    <thead><tr><th>Date</th><th>Restaurant</th><th>Payment</th><th>Amount</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- original complaints -->
+  <h3>Complaints</h3>
   <table id="complaintTable">
-    <thead>
-      <tr>
-        <th>Date</th><th>Restaurant</th><th>Payment</th><th>Amount</th><th>Category</th><th>Details</th>
-      </tr>
-    </thead>
+    <thead><tr><th>Date</th><th>Category</th><th>Details</th></tr></thead>
     <tbody></tbody>
   </table>
 
@@ -31,14 +38,17 @@
 const wanted = new URLSearchParams(location.search).get('phone')?.trim();
 if (!wanted) { document.body.innerHTML = '<h2>No phone supplied</h2>'; throw 0; }
 
-/* ----------  LOAD BOTH JSON FILES  ---------- */
+const COL_PHONE = 'Account Phones';
+const COL_REST  = 'Resturant';
+
+/* ----------  LOAD BOTH FILES  ---------- */
 Promise.all([
   fetch('complaints.json').then(r => r.json()),
   fetch('data.json').then(r => r.json())
 ]).then(([compRows, orderRows]) => {
-  /* normalise phones */
+  /* normalise */
   const complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
-  const orders     = orderRows.map(o => ({...o, [COL_PHONE]: (o['Account Phones'] || '').toString().trim()}));
+  const orders     = orderRows.map(o => ({...o, [COL_PHONE]: (o[COL_PHONE] || '').toString().trim()}));
 
   const list = complaints.filter(c => c.phone === wanted);
   if (!list.length) {
@@ -46,30 +56,46 @@ Promise.all([
     throw 0;
   }
 
-  document.getElementById('title').textContent = `Complaints for ${wanted}`;
+  document.getElementById('title').textContent   = `Complaints for ${wanted}`;
   document.getElementById('summary').textContent = `Total complaints: ${list.length}`;
 
-  const tb = document.querySelector('#complaintTable tbody');
+  /* ---- build unique complaint-date list ---- */
+  const complaintDates = [...new Set(list.map(c => new Date(c.date || '').toDateString()))];
+
+  /* ---- orders that happened on any of those dates ---- */
+  const matchedOrders = orders
+    .filter(o => o[COL_PHONE] === wanted && complaintDates.includes(new Date(o['Created'] || o['OrderDate'] || '').toDateString()))
+    .sort((a, b) => new Date(a['Created'] || a['OrderDate'] || 0) - new Date(b['Created'] || b['OrderDate'] || 0));
+
+  /* ---- render orders ---- */
+  const otb = document.querySelector('#orderTable tbody');
+  if (matchedOrders.length) {
+    matchedOrders.forEach(o => {
+      const tr = document.createElement('tr');
+      tr.className = 'order-row';
+      tr.innerHTML = `
+        <td>${new Date(o['Created'] || o['OrderDate'] || '').toLocaleDateString()}</td>
+        <td>${o[COL_REST] || o['Restaurant'] || ''}</td>
+        <td>${o['Payment Method'] || ''}</td>
+        <td>${parseFloat(o['Total Price'] || 0).toFixed(2)}</td>`;
+      otb.appendChild(tr);
+    });
+  } else {
+    otb.innerHTML = '<tr><td colspan="4">No orders found on complaint date(s)</td></tr>';
+  }
+
+  /* ---- render complaints ---- */
+  const ctb = document.querySelector('#complaintTable tbody');
   list
     .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
     .forEach(c => {
-      /* find order on same date (first match) */
-      const cDate     = new Date(c.date || '').toDateString();
-      const order     = orders.find(o => o[COL_PHONE] === wanted && new Date(o['Created'] || o['OrderDate'] || '').toDateString() === cDate) || {};
-      const rest      = order['Resturant'] || order['Restaurant'] || '';
-      const pay       = order['Payment Method'] || '';
-      const amt       = parseFloat(order['Total Price'] || 0).toFixed(2);
-
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${new Date(c.date || '').toLocaleDateString()}</td>
-        <td>${rest}</td>
-        <td>${pay}</td>
-        <td>${amt}</td>
         <td>${c.category || ''}</td>
         <td>${c.details || ''}</td>`;
-      tb.appendChild(tr);
-});
+      ctb.appendChild(tr);
+    });
 }).catch(err => {
   console.error(err);
   document.body.innerHTML = '<h2>Error loading JSON files</h2>';
