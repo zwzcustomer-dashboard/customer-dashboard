@@ -8,7 +8,7 @@
     body{font-family:system-ui,Arial,Helvetica,sans-serif;margin:0;padding:1rem;background:#f5f7fa;color:#333}
     h2{margin-top:0}
     .badge{background:#e91e63;color:#fff;padding:.3rem .6rem;border-radius:4px;font-size:.9rem}
-    table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 4px rgba(0,0,0,.1);margin-bottom:2rem}
     th,td{padding:.6rem;text-align:left}
     th{background:#e91e63;color:#fff}
     tr:nth-child(even){background:#f2f2f2}
@@ -17,6 +17,9 @@
     .pending{background:#ffecb3;}
     h3{margin:1.5rem 0 .5rem 0;font-size:1.1rem}
     .error{color:#d32f2f;background:#ffcdd2;padding:1rem;border-radius:4px;margin:1rem 0}
+    .status-badge{padding:0.25rem 0.5rem;border-radius:4px;font-size:0.8rem;font-weight:bold}
+    .status-resolved{background:#4caf50;color:white}
+    .status-pending{background:#ff9800;color:white}
   </style>
 </head>
 <body>
@@ -30,12 +33,23 @@
     <tbody></tbody>
   </table>
 
-  <!-- Complaints + Resolutions -->
-  <h3>Complaints & Resolutions</h3>
+  <!-- Complaints -->
+  <h3>Complaints</h3>
   <table id="complaintTable">
     <thead>
       <tr>
-        <th>Date</th><th>Category</th><th>Details</th><th>Resolved By</th><th>Action Taken</th><th>Status</th>
+        <th>Date</th><th>Category</th><th>Complaint Details</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Resolutions -->
+  <h3>Resolutions</h3>
+  <table id="resolutionTable">
+    <thead>
+      <tr>
+        <th>Date</th><th>Resolved By</th><th>Action Taken</th><th>Status</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -144,7 +158,7 @@ Promise.all([
     orderTableBody.innerHTML = '<tr><td colspan="4">No orders found on complaint date(s)</td></tr>';
   }
 
-  /* ---- COMPLAINTS + RESOLUTIONS ---- */
+  /* ---- COMPLAINTS TABLE ---- */
   const complaintTableBody = document.querySelector('#complaintTable tbody');
   
   filteredComplaints.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -153,7 +167,7 @@ Promise.all([
     const complaintDate = new Date(complaint.date);
     const complaintDateStr = isNaN(complaintDate) ? '' : complaintDate.toDateString();
     
-    // Find matching resolution
+    // Find matching resolution to determine status
     const resolution = resolutions.find(r => {
       if (r.phone !== wanted) return false;
       
@@ -173,18 +187,47 @@ Promise.all([
     }
 
     const displayDate = isNaN(complaintDate) ? 'Invalid Date' : complaintDate.toLocaleDateString();
+    const statusClass = resolution.status === 'Resolved' ? 'status-resolved' : 'status-pending';
+    const statusText = resolution.status || 'Pending';
     
     row.innerHTML = `
       <td>${displayDate}</td>
       <td>${complaint.category || 'N/A'}</td>
       <td>${complaint.details || 'N/A'}</td>
-      <td>${resolution.resolvedBy || '—'}</td>
-      <td>${resolution.action || '—'}</td>
-      <td>${resolution.status || 'Pending'}</td>
+      <td><span class="status-badge ${statusClass}">${statusText}</span></td>
     `;
     
     complaintTableBody.appendChild(row);
   });
+
+  /* ---- RESOLUTIONS TABLE ---- */
+  const resolutionTableBody = document.querySelector('#resolutionTable tbody');
+  
+  // Filter resolutions for this phone number
+  const filteredResolutions = resolutions.filter(r => r.phone === wanted);
+  
+  if (filteredResolutions.length) {
+    filteredResolutions.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    filteredResolutions.forEach(resolution => {
+      const row = document.createElement('tr');
+      
+      const resolutionDate = new Date(resolution.date);
+      const displayDate = isNaN(resolutionDate) ? 'Invalid Date' : resolutionDate.toLocaleDateString();
+      const statusClass = resolution.status === 'Resolved' ? 'status-resolved' : 'status-pending';
+      
+      row.innerHTML = `
+        <td>${displayDate}</td>
+        <td>${resolution.resolvedBy || '—'}</td>
+        <td>${resolution.action || '—'}</td>
+        <td><span class="status-badge ${statusClass}">${resolution.status || 'Pending'}</span></td>
+      `;
+      
+      resolutionTableBody.appendChild(row);
+    });
+  } else {
+    resolutionTableBody.innerHTML = '<tr><td colspan="4">No resolutions found</td></tr>';
+  }
 
 }).catch(error => {
   console.error('Error:', error);
