@@ -49,7 +49,7 @@
   <table id="resolutionTable">
     <thead>
       <tr>
-        <th>Date</th><th>Resolved By</th><th>Action Taken</th><th>Status</th>
+        <th>Date</th><th>Resolved By</th><th>Resolution Details</th><th>Status</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -105,8 +105,8 @@ Promise.all([
     ...r,
     phone: (r.phone || r.Phone || '').toString().trim(),
     date: r.date || r.Date || '',
-    resolvedBy: r.resolvedBy || r['Resolved By'] || '',
-    action: r.action || r.Action || r['Action Taken'] || '',
+    resolvedBy: r.resolvedBy || r['Resolved By'] || r.Resolvedby || '',
+    resolution: r.resolution || r.Resolution || r.action || r.Action || r['Action Taken'] || '',
     status: r.status || r.Status || ''
   }));
 
@@ -219,7 +219,7 @@ Promise.all([
       row.innerHTML = `
         <td>${displayDate}</td>
         <td>${resolution.resolvedBy || '—'}</td>
-        <td>${resolution.action || '—'}</td>
+        <td>${resolution.resolution || '—'}</td>
         <td><span class="status-badge ${statusClass}">${resolution.status || 'Pending'}</span></td>
       `;
       
