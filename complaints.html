@@ -13,6 +13,8 @@
     th{background:#e91e63;color:#fff}
     tr:nth-child(even){background:#f2f2f2}
     .order-row{background:#e3f2fd;}
+    .resolved{background:#c8e6c9;}
+    .pending{background:#ffecb3;}
     h3{margin:1.5rem 0 .5rem 0;font-size:1.1rem}
   </style>
 </head>
@@ -20,17 +22,21 @@
   <h2 id="title"></h2>
   <p id="summary"></p>
 
-  <!-- NEW: orders that happened on complaint date(s) -->
+  <!-- Orders on complaint date(s) -->
   <h3>Order(s) on complaint date(s)</h3>
   <table id="orderTable">
     <thead><tr><th>Date</th><th>Restaurant</th><th>Payment</th><th>Amount</th></tr></thead>
     <tbody></tbody>
   </table>
 
-  <!-- original complaints -->
-  <h3>Complaints</h3>
+  <!-- Complaints + Resolutions -->
+  <h3>Complaints & Resolutions</h3>
   <table id="complaintTable">
-    <thead><tr><th>Date</th><th>Category</th><th>Details</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Date</th><th>Category</th><th>Details</th><th>Resolved By</th><th>Action Taken</th><th>Status</th>
+      </tr>
+    </thead>
     <tbody></tbody>
   </table>
 
@@ -41,14 +47,16 @@ if (!wanted) { document.body.innerHTML = '<h2>No phone supplied</h2>'; throw 0; 
 const COL_PHONE = 'Account Phones';
 const COL_REST  = 'Resturant';
 
-/* ----------  LOAD BOTH FILES  ---------- */
+/* ----------  LOAD ALL THREE FILES  ---------- */
 Promise.all([
   fetch('complaints.json').then(r => r.json()),
-  fetch('data.json').then(r => r.json())
-]).then(([compRows, orderRows]) => {
-  /* normalise */
+  fetch('data.json').then(r => r.json()),
+  fetch('resolutions.json').then(r => r.json())
+]).then(([compRows, orderRows, resRows]) => {
+  /* normalise phones & dates */
   const complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
   const orders     = orderRows.map(o => ({...o, [COL_PHONE]: (o[COL_PHONE] || '').toString().trim()}));
+  const resolutions= resRows.map(r => ({...r, phone: (r.phone || '').toString().trim(), date: (r.date || '').toString().trim()}));
 
   const list = complaints.filter(c => c.phone === wanted);
   if (!list.length) {
@@ -59,20 +67,16 @@ Promise.all([
   document.getElementById('title').textContent   = `Complaints for ${wanted}`;
   document.getElementById('summary').textContent = `Total complaints: ${list.length}`;
 
-  /* ---- build unique complaint-date list ---- */
+  /* ---- orders on complaint date(s) ---- */
   const complaintDates = [...new Set(list.map(c => new Date(c.date || '').toDateString()))];
-
-  /* ---- orders that happened on any of those dates ---- */
   const matchedOrders = orders
     .filter(o => o[COL_PHONE] === wanted && complaintDates.includes(new Date(o['Created'] || o['OrderDate'] || '').toDateString()))
     .sort((a, b) => new Date(a['Created'] || a['OrderDate'] || 0) - new Date(b['Created'] || b['OrderDate'] || 0));
 
-  /* ---- render orders ---- */
   const otb = document.querySelector('#orderTable tbody');
   if (matchedOrders.length) {
     matchedOrders.forEach(o => {
-      const tr = document.createElement('tr');
-      tr.className = 'order-row';
+      const tr = document.createElement('tr'); tr.className = 'order-row';
       tr.innerHTML = `
         <td>${new Date(o['Created'] || o['OrderDate'] || '').toLocaleDateString()}</td>
         <td>${o[COL_REST] || o['Restaurant'] || ''}</td>
@@ -84,16 +88,22 @@ Promise.all([
     otb.innerHTML = '<tr><td colspan="4">No orders found on complaint date(s)</td></tr>';
   }
 
-  /* ---- render complaints ---- */
+  /* ---- complaints + resolutions ---- */
   const ctb = document.querySelector('#complaintTable tbody');
   list
     .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
     .forEach(c => {
+      const cDateStr = new Date(c.date || '').toDateString();
+      const res = resolutions.find(r => r.phone === wanted && new Date(r.date).toDateString() === cDateStr) || {};
       const tr = document.createElement('tr');
+      tr.className = res.status === 'Resolved' ? 'resolved' : (res.status ? '' : 'pending');
       tr.innerHTML = `
         <td>${new Date(c.date || '').toLocaleDateString()}</td>
         <td>${c.category || ''}</td>
-        <td>${c.details || ''}</td>`;
+        <td>${c.details || ''}</td>
+        <td>${res.resolvedBy || '—'}</td>
+        <td>${res.action || '—'}</td>
+        <td>${res.status || 'Pending'}</td>`;
       ctb.appendChild(tr);
     });
 }).catch(err => {
