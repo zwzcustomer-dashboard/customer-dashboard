@@ -17,13 +17,11 @@
     .pending{background:#ffecb3;}
     h3{margin:1.5rem 0 .5rem 0;font-size:1.1rem}
     .error{color:#d32f2f;background:#ffcdd2;padding:1rem;border-radius:4px;margin:1rem 0}
-    .debug{background:#f5f5f5;padding:1rem;margin:1rem 0;border-radius:4px;font-family:monospace;font-size:0.9rem}
   </style>
 </head>
 <body>
   <h2 id="title"></h2>
   <p id="summary"></p>
-  <div id="debugInfo" class="debug" style="display:none;"></div>
 
   <!-- Orders on complaint date(s) -->
   <h3>Order(s) on complaint date(s)</h3>
@@ -56,15 +54,6 @@ if (!wanted) {
 // Display the phone number we're searching for
 document.getElementById('title').textContent = `Complaints for ${wanted}`;
 
-// Debug function to show what's happening
-function showDebugInfo(message) {
-  const debugDiv = document.getElementById('debugInfo');
-  debugDiv.style.display = 'block';
-  debugDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
-}
-
-showDebugInfo(`Searching for phone: ${wanted}`);
-
 // Load all JSON files
 Promise.all([
   fetch('complaints.json').then(r => {
@@ -80,13 +69,6 @@ Promise.all([
     return r.json();
   })
 ]).then(([compRows, orderRows, resRows]) => {
-  showDebugInfo(`Loaded: ${compRows.length} complaints, ${orderRows.length} orders, ${resRows.length} resolutions`);
-  
-  // Log first item of each to check structure
-  console.log('First complaint:', compRows[0]);
-  console.log('First order:', orderRows[0]);
-  console.log('First resolution:', resRows[0]);
-
   // Normalize data
   const complaints = compRows.map(c => ({
     ...c,
@@ -116,7 +98,6 @@ Promise.all([
 
   // Filter complaints for the wanted phone number
   const filteredComplaints = complaints.filter(c => c.phone === wanted);
-  showDebugInfo(`Found ${filteredComplaints.length} complaints for this phone number`);
 
   if (!filteredComplaints.length) {
     document.body.innerHTML = `<h2 class="error">No complaints found for phone ${wanted}</h2>`;
@@ -131,8 +112,6 @@ Promise.all([
     return isNaN(date) ? null : date.toDateString();
   }).filter(Boolean))];
 
-  showDebugInfo(`Complaint dates: ${complaintDates.join(', ')}`);
-
   const matchedOrders = orders.filter(o => {
     if (o.phone !== wanted) return false;
     
@@ -141,8 +120,6 @@ Promise.all([
     
     return complaintDates.includes(orderDate.toDateString());
   });
-
-  showDebugInfo(`Found ${matchedOrders.length} orders on complaint dates`);
 
   const orderTableBody = document.querySelector('#orderTable tbody');
   if (matchedOrders.length) {
@@ -209,12 +186,9 @@ Promise.all([
     complaintTableBody.appendChild(row);
   });
 
-  showDebugInfo('Data display completed');
-
 }).catch(error => {
   console.error('Error:', error);
-  showDebugInfo(`Error: ${error.message}`);
-  document.body.innerHTML = `<h2 class="error">Error loading data</h2><p>${error.message}</p><p>Check browser console for details.</p>`;
+  document.body.innerHTML = `<h2 class="error">Error loading data</h2><p>Check browser console for details.</p>`;
 });
 </script>
 </body>
