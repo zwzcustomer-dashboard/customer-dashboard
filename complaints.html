@@ -12,13 +12,18 @@
     th,td{padding:.6rem;text-align:left}
     th{background:#e91e63;color:#fff}
     tr:nth-child(even){background:#f2f2f2}
+    .order-row{background:#e3f2fd;}
   </style>
 </head>
 <body>
   <h2 id="title"></h2>
   <p id="summary"></p>
   <table id="complaintTable">
-    <thead><tr><th>Date</th><th>Category</th><th>Details</th></tr></thead>
+    <thead>
+      <tr>
+        <th>Date</th><th>Restaurant</th><th>Payment</th><th>Amount</th><th>Category</th><th>Details</th>
+      </tr>
+    </thead>
     <tbody></tbody>
   </table>
 
@@ -26,33 +31,49 @@
 const wanted = new URLSearchParams(location.search).get('phone')?.trim();
 if (!wanted) { document.body.innerHTML = '<h2>No phone supplied</h2>'; throw 0; }
 
-fetch('complaints.json')
-  .then(r => r.json())
-  .then(rows => {
-    const list = rows.filter(c => c.phone === wanted);
-    if (!list.length) {
-      document.body.innerHTML = `<h2>No complaints for phone ${wanted}</h2>`;
-      throw 0;
-    }
-    document.getElementById('title').textContent = `Complaints for ${wanted}`;
-    document.getElementById('summary').textContent = `Total complaints: ${list.length}`;
+/* ----------  LOAD BOTH JSON FILES  ---------- */
+Promise.all([
+  fetch('complaints.json').then(r => r.json()),
+  fetch('data.json').then(r => r.json())
+]).then(([compRows, orderRows]) => {
+  /* normalise phones */
+  const complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
+  const orders     = orderRows.map(o => ({...o, [COL_PHONE]: (o['Account Phones'] || '').toString().trim()}));
 
-    const tb = document.querySelector('#complaintTable tbody');
-    list
-      .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
-      .forEach(c => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${new Date(c.date || '').toLocaleDateString()}</td>
-          <td>${c.category || ''}</td>
-          <td>${c.details || ''}</td>`;
-        tb.appendChild(tr);
-      });
-  })
-  .catch(err => {
-    console.error(err);
-    document.body.innerHTML = '<h2>Error loading complaints.json</h2>';
-  });
+  const list = complaints.filter(c => c.phone === wanted);
+  if (!list.length) {
+    document.body.innerHTML = `<h2>No complaints for phone ${wanted}</h2>`;
+    throw 0;
+  }
+
+  document.getElementById('title').textContent = `Complaints for ${wanted}`;
+  document.getElementById('summary').textContent = `Total complaints: ${list.length}`;
+
+  const tb = document.querySelector('#complaintTable tbody');
+  list
+    .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
+    .forEach(c => {
+      /* find order on same date (first match) */
+      const cDate     = new Date(c.date || '').toDateString();
+      const order     = orders.find(o => o[COL_PHONE] === wanted && new Date(o['Created'] || o['OrderDate'] || '').toDateString() === cDate) || {};
+      const rest      = order['Resturant'] || order['Restaurant'] || '';
+      const pay       = order['Payment Method'] || '';
+      const amt       = parseFloat(order['Total Price'] || 0).toFixed(2);
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${new Date(c.date || '').toLocaleDateString()}</td>
+        <td>${rest}</td>
+        <td>${pay}</td>
+        <td>${amt}</td>
+        <td>${c.category || ''}</td>
+        <td>${c.details || ''}</td>`;
+      tb.appendChild(tr);
+});
+}).catch(err => {
+  console.error(err);
+  document.body.innerHTML = '<h2>Error loading JSON files</h2>';
+});
 </script>
 </body>
 </html>
