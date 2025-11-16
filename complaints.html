@@ -16,11 +16,14 @@
     .resolved{background:#c8e6c9;}
     .pending{background:#ffecb3;}
     h3{margin:1.5rem 0 .5rem 0;font-size:1.1rem}
+    .error{color:#d32f2f;background:#ffcdd2;padding:1rem;border-radius:4px;margin:1rem 0}
+    .debug{background:#f5f5f5;padding:1rem;margin:1rem 0;border-radius:4px;font-family:monospace;font-size:0.9rem}
   </style>
 </head>
 <body>
   <h2 id="title"></h2>
   <p id="summary"></p>
+  <div id="debugInfo" class="debug" style="display:none;"></div>
 
   <!-- Orders on complaint date(s) -->
   <h3>Order(s) on complaint date(s)</h3>
@@ -41,74 +44,177 @@
   </table>
 
 <script>
-const wanted = new URLSearchParams(location.search).get('phone')?.trim();
-if (!wanted) { document.body.innerHTML = '<h2>No phone supplied</h2>'; throw 0; }
+// Get phone number from URL parameter
+const urlParams = new URLSearchParams(location.search);
+const wanted = urlParams.get('phone')?.trim();
 
-const COL_PHONE = 'Account Phones';
-const COL_REST  = 'Resturant';
+if (!wanted) {
+  document.body.innerHTML = '<h2 class="error">No phone number supplied</h2><p>Please add ?phone=YOUR_PHONE_NUMBER to the URL</p>';
+  throw new Error('No phone supplied');
+}
 
-/* ----------  LOAD ALL THREE FILES  ---------- */
+// Display the phone number we're searching for
+document.getElementById('title').textContent = `Complaints for ${wanted}`;
+
+// Debug function to show what's happening
+function showDebugInfo(message) {
+  const debugDiv = document.getElementById('debugInfo');
+  debugDiv.style.display = 'block';
+  debugDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+}
+
+showDebugInfo(`Searching for phone: ${wanted}`);
+
+// Load all JSON files
 Promise.all([
-  fetch('complaints.json').then(r => r.json()),
-  fetch('data.json').then(r => r.json()),
-  fetch('resolutions.json').then(r => r.json())
+  fetch('complaints.json').then(r => {
+    if (!r.ok) throw new Error(`Failed to load complaints.json: ${r.status}`);
+    return r.json();
+  }),
+  fetch('data.json').then(r => {
+    if (!r.ok) throw new Error(`Failed to load data.json: ${r.status}`);
+    return r.json();
+  }),
+  fetch('resolutions.json').then(r => {
+    if (!r.ok) throw new Error(`Failed to load resolutions.json: ${r.status}`);
+    return r.json();
+  })
 ]).then(([compRows, orderRows, resRows]) => {
-  /* normalise phones & dates */
-  const complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
-  const orders     = orderRows.map(o => ({...o, [COL_PHONE]: (o[COL_PHONE] || '').toString().trim()}));
-  const resolutions= resRows.map(r => ({...r, phone: (r.phone || '').toString().trim(), date: (r.date || '').toString().trim()}));
+  showDebugInfo(`Loaded: ${compRows.length} complaints, ${orderRows.length} orders, ${resRows.length} resolutions`);
+  
+  // Log first item of each to check structure
+  console.log('First complaint:', compRows[0]);
+  console.log('First order:', orderRows[0]);
+  console.log('First resolution:', resRows[0]);
 
-  const list = complaints.filter(c => c.phone === wanted);
-  if (!list.length) {
-    document.body.innerHTML = `<h2>No complaints for phone ${wanted}</h2>`;
-    throw 0;
+  // Normalize data
+  const complaints = compRows.map(c => ({
+    ...c,
+    phone: (c.phone || c.Phone || '').toString().trim(),
+    date: c.date || c.Date || '',
+    category: c.category || c.Category || '',
+    details: c.details || c.Details || ''
+  }));
+
+  const orders = orderRows.map(o => ({
+    ...o,
+    phone: (o.phone || o.Phone || o['Account Phones'] || '').toString().trim(),
+    restaurant: o.restaurant || o.Restaurant || o.Resturant || '',
+    date: o.date || o.Date || o.Created || o.OrderDate || '',
+    payment: o.payment || o.Payment || o['Payment Method'] || '',
+    amount: o.amount || o.Amount || o['Total Price'] || 0
+  }));
+
+  const resolutions = resRows.map(r => ({
+    ...r,
+    phone: (r.phone || r.Phone || '').toString().trim(),
+    date: r.date || r.Date || '',
+    resolvedBy: r.resolvedBy || r['Resolved By'] || '',
+    action: r.action || r.Action || r['Action Taken'] || '',
+    status: r.status || r.Status || ''
+  }));
+
+  // Filter complaints for the wanted phone number
+  const filteredComplaints = complaints.filter(c => c.phone === wanted);
+  showDebugInfo(`Found ${filteredComplaints.length} complaints for this phone number`);
+
+  if (!filteredComplaints.length) {
+    document.body.innerHTML = `<h2 class="error">No complaints found for phone ${wanted}</h2>`;
+    return;
   }
 
-  document.getElementById('title').textContent   = `Complaints for ${wanted}`;
-  document.getElementById('summary').textContent = `Total complaints: ${list.length}`;
+  document.getElementById('summary').textContent = `Total complaints: ${filteredComplaints.length}`;
 
-  /* ---- orders on complaint date(s) ---- */
-  const complaintDates = [...new Set(list.map(c => new Date(c.date || '').toDateString()))];
-  const matchedOrders = orders
-    .filter(o => o[COL_PHONE] === wanted && complaintDates.includes(new Date(o['Created'] || o['OrderDate'] || '').toDateString()))
-    .sort((a, b) => new Date(a['Created'] || a['OrderDate'] || 0) - new Date(b['Created'] || b['OrderDate'] || 0));
+  /* ---- ORDERS ON COMPLAINT DATE(S) ---- */
+  const complaintDates = [...new Set(filteredComplaints.map(c => {
+    const date = new Date(c.date);
+    return isNaN(date) ? null : date.toDateString();
+  }).filter(Boolean))];
 
-  const otb = document.querySelector('#orderTable tbody');
+  showDebugInfo(`Complaint dates: ${complaintDates.join(', ')}`);
+
+  const matchedOrders = orders.filter(o => {
+    if (o.phone !== wanted) return false;
+    
+    const orderDate = new Date(o.date);
+    if (isNaN(orderDate)) return false;
+    
+    return complaintDates.includes(orderDate.toDateString());
+  });
+
+  showDebugInfo(`Found ${matchedOrders.length} orders on complaint dates`);
+
+  const orderTableBody = document.querySelector('#orderTable tbody');
   if (matchedOrders.length) {
-    matchedOrders.forEach(o => {
-      const tr = document.createElement('tr'); tr.className = 'order-row';
-      tr.innerHTML = `
-        <td>${new Date(o['Created'] || o['OrderDate'] || '').toLocaleDateString()}</td>
-        <td>${o[COL_REST] || o['Restaurant'] || ''}</td>
-        <td>${o['Payment Method'] || ''}</td>
-        <td>${parseFloat(o['Total Price'] || 0).toFixed(2)}</td>`;
-      otb.appendChild(tr);
+    matchedOrders.sort((a, b) => new Date(a.date) - new Date(b.date));
+    matchedOrders.forEach(order => {
+      const row = document.createElement('tr');
+      row.className = 'order-row';
+      
+      const orderDate = new Date(order.date);
+      const dateString = isNaN(orderDate) ? 'Invalid Date' : orderDate.toLocaleDateString();
+      const amount = parseFloat(order.amount) || 0;
+      
+      row.innerHTML = `
+        <td>${dateString}</td>
+        <td>${order.restaurant || 'N/A'}</td>
+        <td>${order.payment || 'N/A'}</td>
+        <td>${amount.toFixed(2)}</td>
+      `;
+      orderTableBody.appendChild(row);
     });
   } else {
-    otb.innerHTML = '<tr><td colspan="4">No orders found on complaint date(s)</td></tr>';
+    orderTableBody.innerHTML = '<tr><td colspan="4">No orders found on complaint date(s)</td></tr>';
   }
 
-  /* ---- complaints + resolutions ---- */
-  const ctb = document.querySelector('#complaintTable tbody');
-  list
-    .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
-    .forEach(c => {
-      const cDateStr = new Date(c.date || '').toDateString();
-      const res = resolutions.find(r => r.phone === wanted && new Date(r.date).toDateString() === cDateStr) || {};
-      const tr = document.createElement('tr');
-      tr.className = res.status === 'Resolved' ? 'resolved' : (res.status ? '' : 'pending');
-      tr.innerHTML = `
-        <td>${new Date(c.date || '').toLocaleDateString()}</td>
-        <td>${c.category || ''}</td>
-        <td>${c.details || ''}</td>
-        <td>${res.resolvedBy || '—'}</td>
-        <td>${res.action || '—'}</td>
-        <td>${res.status || 'Pending'}</td>`;
-      ctb.appendChild(tr);
-    });
-}).catch(err => {
-  console.error(err);
-  document.body.innerHTML = '<h2>Error loading JSON files</h2>';
+  /* ---- COMPLAINTS + RESOLUTIONS ---- */
+  const complaintTableBody = document.querySelector('#complaintTable tbody');
+  
+  filteredComplaints.sort((a, b) => new Date(a.date) - new Date(b.date));
+  
+  filteredComplaints.forEach(complaint => {
+    const complaintDate = new Date(complaint.date);
+    const complaintDateStr = isNaN(complaintDate) ? '' : complaintDate.toDateString();
+    
+    // Find matching resolution
+    const resolution = resolutions.find(r => {
+      if (r.phone !== wanted) return false;
+      
+      const resolutionDate = new Date(r.date);
+      if (isNaN(resolutionDate)) return false;
+      
+      return resolutionDate.toDateString() === complaintDateStr;
+    }) || {};
+
+    const row = document.createElement('tr');
+    
+    // Apply status-based styling
+    if (resolution.status === 'Resolved') {
+      row.className = 'resolved';
+    } else if (!resolution.status) {
+      row.className = 'pending';
+    }
+
+    const displayDate = isNaN(complaintDate) ? 'Invalid Date' : complaintDate.toLocaleDateString();
+    
+    row.innerHTML = `
+      <td>${displayDate}</td>
+      <td>${complaint.category || 'N/A'}</td>
+      <td>${complaint.details || 'N/A'}</td>
+      <td>${resolution.resolvedBy || '—'}</td>
+      <td>${resolution.action || '—'}</td>
+      <td>${resolution.status || 'Pending'}</td>
+    `;
+    
+    complaintTableBody.appendChild(row);
+  });
+
+  showDebugInfo('Data display completed');
+
+}).catch(error => {
+  console.error('Error:', error);
+  showDebugInfo(`Error: ${error.message}`);
+  document.body.innerHTML = `<h2 class="error">Error loading data</h2><p>${error.message}</p><p>Check browser console for details.</p>`;
 });
 </script>
 </body>
