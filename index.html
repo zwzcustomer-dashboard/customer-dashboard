@@ -566,24 +566,24 @@
   <!-- KPI Cards -->
   <div class="kpi-grid">
     <div class="kpi-card">
-      <div class="kpi-value" id="totalCustomers">4,581</div>
+      <div class="kpi-value" id="totalCustomers">0</div>
       <div class="kpi-label">Total Customers</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-value" id="avgOrderValue">EGP 824.50</div>
+      <div class="kpi-value" id="avgOrderValue">EGP 0.00</div>
       <div class="kpi-label">Avg Order Value</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-value" id="withComplaints">12%</div>
+      <div class="kpi-value" id="withComplaints">0%</div>
       <div class="kpi-label">With Complaints</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-value" id="lostCustomers">892</div>
+      <div class="kpi-value" id="lostCustomers">0</div>
       <div class="kpi-label">Lost Customers</div>
     </div>
   </div>
 
-  <div id="status">Ready.</div>
+  <div id="status">Loading data…</div>
 
   <!-- Organized Filters -->
   <div class="controls">
@@ -594,9 +594,7 @@
           <span class="filter-label">Restaurant</span>
           <select id="restFilter" class="filter-input">
             <option>All</option>
-            <option>Main Restaurant</option>
-            <option>Downtown Branch</option>
-            <option>Westside Location</option>
+            <!-- Restaurants will be populated automatically -->
           </select>
         </div>
         
@@ -604,9 +602,7 @@
           <span class="filter-label">Year</span>
           <select id="yearFilter" class="filter-input">
             <option>All</option>
-            <option>2025</option>
-            <option>2024</option>
-            <option>2023</option>
+            <!-- Years will be populated automatically -->
           </select>
         </div>
 
@@ -704,7 +700,7 @@
   </div>
 
   <div class="stats-container">
-    <div id="stats">Showing 4,581 customers</div>
+    <div id="stats"></div>
   </div>
 
   <div class="table-container">
@@ -721,108 +717,7 @@
           <th>Complaints</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td><a href="details.html?phone=1555150699" target="_blank">1555150699</a></td>
-          <td>محمد جمال</td>
-          <td>141</td>
-          <td>EGP 39,416.00</td>
-          <td>EGP 279.55</td>
-          <td>10/16/2025</td>
-          <td><span class="status-badge status-active">31</span></td>
-          <td>0</td>
-        </tr>
-        <tr>
-          <td><a href="details.html?phone=1019263561" target="_blank">1019263561</a></td>
-          <td>موليد</td>
-          <td>108</td>
-          <td>EGP 34,795.00</td>
-          <td>EGP 322.18</td>
-          <td>10/19/2025</td>
-          <td><span class="status-badge status-active">29</span></td>
-          <td>0</td>
-        </tr>
-        <tr>
-          <td><a href="details.html?phone=1223399033" target="_blank">1223399033</a></td>
-          <td>عمرو وهبة</td>
-          <td>104</td>
-          <td>EGP 31,909.00</td>
-          <td>EGP 306.82</td>
-          <td>10/16/2025</td>
-          <td><span class="status-badge status-active">31</span></td>
-          <td><a href="complaints.html?phone=1223399033" target="_blank">1</a></td>
-        </tr>
-        <tr class="complaints-high">
-          <td><a href="details.html?phone=1007744470" target="_blank">1007744470</a></td>
-          <td>روان الزر</td>
-          <td>99</td>
-          <td>EGP 136,635.00</td>
-          <td>EGP 1,380.15</td>
-          <td>10/16/2025</td>
-          <td><span class="status-badge status-active">31</span></td>
-          <td><a href="complaints.html?phone=1007744470" target="_blank">2</a></td>
-        </tr>
-        <tr>
-          <td><a href="details.html?phone=1007178206" target="_blank">1007178206</a></td>
-          <td>نيزار احمد</td>
-          <td>92</td>
-          <td>EGP 70,930.00</td>
-          <td>EGP 770.98</td>
-          <td>10/19/2025</td>
-          <td><span class="status-badge status-active">28</span></td>
-          <td><a href="complaints.html?phone=1007178206" target="_blank">1</a></td>
-        </tr>
-        <tr class="complaints-high">
-          <td><a href="details.html?phone=1204386666" target="_blank">1204386666</a></td>
-          <td>احمد محمد</td>
-          <td>92</td>
-          <td>EGP 42,393.00</td>
-          <td>EGP 460.79</td>
-          <td>10/12/2025</td>
-          <td><span class="status-badge status-warning">36</span></td>
-          <td><a href="complaints.html?phone=1204386666" target="_blank">2</a></td>
-        </tr>
-        <tr class="complaints-high">
-          <td><a href="details.html?phone=1060820156" target="_blank">1060820156</a></td>
-          <td>عصام رمضان</td>
-          <td>84</td>
-          <td>EGP 161,393.00</td>
-          <td>EGP 1,921.35</td>
-          <td>12/2/2024</td>
-          <td><span class="status-badge status-inactive">350</span></td>
-          <td><a href="complaints.html?phone=1060820156" target="_blank">12</a></td>
-        </tr>
-        <tr>
-          <td><a href="details.html?phone=1211330029" target="_blank">1211330029</a></td>
-          <td>زياد هشام</td>
-          <td>84</td>
-          <td>EGP 41,594.00</td>
-          <td>EGP 495.17</td>
-          <td>9/17/2025</td>
-          <td><span class="status-badge status-inactive">60</span></td>
-          <td><a href="complaints.html?phone=1211330029" target="_blank">1</a></td>
-        </tr>
-        <tr class="complaints-high">
-          <td><a href="details.html?phone=1103372372" target="_blank">1103372372</a></td>
-          <td>محمد عبود</td>
-          <td>82</td>
-          <td>EGP 35,734.00</td>
-          <td>EGP 435.78</td>
-          <td>10/16/2025</td>
-          <td><span class="status-badge status-active">31</span></td>
-          <td><a href="complaints.html?phone=1103372372" target="_blank">3</a></td>
-        </tr>
-        <tr>
-          <td><a href="details.html?phone=1093783969" target="_blank">1093783969</a></td>
-          <td>نيم بن عبدالحكيم</td>
-          <td>81</td>
-          <td>EGP 26,088.00</td>
-          <td>EGP 322.07</td>
-          <td>10/19/2025</td>
-          <td><span class="status-badge status-active">28</span></td>
-          <td><a href="complaints.html?phone=1093783969" target="_blank">2</a></td>
-        </tr>
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
@@ -839,18 +734,132 @@
     let complaints = [];
     const today    = new Date();
 
-    /* ----------  EVENT LISTENERS  ---------- */
-    function setupEventListeners() {
-      // Basic filters
-      document.getElementById('restFilter').addEventListener('change', applyFilters);
-      document.getElementById('yearFilter').addEventListener('change', applyFilters);
+    // Predefined restaurant list including Talabat
+    const predefinedRestaurants = [
+      'All',
+      'Beverly hills',
+      'CFC', 
+      'Lakeyard',
+      'Maadi',
+      'marassi',
+      'Water Way',
+      'West Mark',
+      'talabat'
+    ];
+
+    /* ----------  LOAD + NORMALISE + DEBUG  ---------- */
+    Promise.all([
+      fetch('data.json').then(r => r.json()),
+      fetch('complaints.json').then(r => r.json())
+    ])
+    .then(([dataRows, compRows]) => {
+      rawRows    = dataRows.map(r => ({...r, [COL_PHONE]: (r[COL_PHONE] || '').toString().trim()}));
+      complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
+      console.log('data phones  :', [...new Set(rawRows.map(r=>r[COL_PHONE]))].slice(0,5));
+      console.log('compl phones :', [...new Set(complaints.map(c=>c.phone))].slice(0,5));
+      aggregate();
+      populateDropdowns();
+      applyFilters();
+      updateKPICards();
+      setStatus('Ready.', 'green');
+    })
+    .catch(err => {
+      console.error(err);
+      setStatus('Error loading JSON files', 'red');
+    });
+
+    /* ----------  STATUS  ---------- */
+    function setStatus(msg, color = 'black') {
+      const s = document.getElementById('status');
+      s.textContent = msg;
+      s.style.color = color;
+    }
+
+    /* ----------  AGGREGATE  ---------- */
+    function aggregate() {
+      const map = {};
+      rawRows.forEach(r => {
+        const phone = r[COL_PHONE];
+        if (!phone) return;
+        if (!map[phone]) map[phone] = { phone, name: r[COL_NAME] || '—', orders: [], total: 0 };
+        const amt  = parseFloat(r[COL_TOTAL]) || 0;
+        const date = new Date(r[COL_DATE] || '');
+        const rest = r[COL_REST] || r['Restaurant'] || '';
+        map[phone].orders.push({ date, value: amt, rest });
+        map[phone].total += amt;
+      });
+
+      aggData = Object.values(map).map(x => {
+        x.orders.sort((a, b) => a.date - b.date);
+        const last = x.orders[x.orders.length - 1].date;
+        const days = Math.floor((today - last) / 864e5);
+        const compCount = complaints.filter(c => c.phone === x.phone).length;
+        return {
+          phone: x.phone,
+          name: x.name,
+          orders: x.orders.length,
+          totalSpent: x.total,
+          avgSpent: x.total / x.orders.length,
+          lastOrder: last,
+          daysAgo: days,
+          year: last.getFullYear(),
+          orderList: x.orders,
+          complaintCount: compCount
+        };
+      });
+    }
+
+    /* ----------  UPDATE KPI CARDS  ---------- */
+    function updateKPICards() {
+      // Total Revenue
+      const totalRevenue = aggData.reduce((sum, customer) => sum + customer.totalSpent, 0);
+      document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
       
-      // Range filters
-      ['avgMin', 'avgMax', 'totMin', 'totMax', 'lastMin', 'lastMax', 'ordMin', 'ordMax', 'compMin']
+      // Total Customers
+      document.getElementById('totalCustomers').textContent = aggData.length.toLocaleString();
+      
+      // Average Order Value
+      const totalOrders = aggData.reduce((sum, customer) => sum + customer.orders, 0);
+      const avgOrderValue = totalRevenue / totalOrders;
+      document.getElementById('avgOrderValue').textContent = formatCurrency(avgOrderValue);
+      
+      // Customers with Complaints
+      const customersWithComplaints = aggData.filter(c => c.complaintCount > 0).length;
+      const complaintPercentage = ((customersWithComplaints / aggData.length) * 100).toFixed(1);
+      document.getElementById('withComplaints').textContent = `${complaintPercentage}%`;
+      
+      // Lost Customers (90+ days)
+      const lostCustomers = aggData.filter(c => c.daysAgo > 90).length;
+      document.getElementById('lostCustomers').textContent = lostCustomers.toLocaleString();
+    }
+
+    function formatCurrency(amount) {
+      return 'EGP ' + amount.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    /* ----------  DROPDOWNS  ---------- */
+    function populateDropdowns() {
+      // Get restaurants from data and combine with predefined list
+      const dataRestaurants = [...new Set(rawRows.map(r => r[COL_REST] || r['Restaurant'] || '').filter(Boolean))];
+      const allRestaurants = [...new Set([...predefinedRestaurants, ...dataRestaurants])].sort();
+      
+      // Populate restaurant filter
+      const restFilter = document.getElementById('restFilter');
+      restFilter.innerHTML = allRestaurants.map(r => `<option>${r}</option>`).join('');
+      
+      // Populate year filter
+      const years = ['All', ...new Set(aggData.map(x => x.year))].sort((a, b) => b - a);
+      document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
+    }
+
+    /* ----------  LIVE FILTERS  ---------- */
+    function setupEventListeners() {
+      ['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','complaintKeyword','compMin']
         .forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
       
-      // Other filters
-      document.getElementById('complaintKeyword').addEventListener('change', applyFilters);
       document.getElementById('lostOnly').addEventListener('change', applyFilters);
     }
 
@@ -858,8 +867,36 @@
     document.addEventListener('DOMContentLoaded', setupEventListeners);
 
     function applyFilters() {
-      // Filter logic would go here
-      console.log('Applying filters...');
+      const restSel  = document.getElementById('restFilter').value;
+      const yearSel  = document.getElementById('yearFilter').value;
+      const avgMin   = parseFloat(document.getElementById('avgMin').value) || 0;
+      const avgMax   = parseFloat(document.getElementById('avgMax').value) || Infinity;
+      const totMin   = parseFloat(document.getElementById('totMin').value) || 0;
+      const totMax   = parseFloat(document.getElementById('totMax').value) || Infinity;
+      const lastMin  = parseInt(document.getElementById('lastMin').value) || 0;
+      const lastMax  = parseInt(document.getElementById('lastMax').value) || Infinity;
+      const ordMin   = parseInt(document.getElementById('ordMin').value) || 0;
+      const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
+      const lostOnly = document.getElementById('lostOnly').checked;
+      const keyword  = document.getElementById('complaintKeyword').value.trim().toLowerCase();
+      const compMin  = parseInt(document.getElementById('compMin').value) || 0;
+
+      let list = aggData.filter(x =>
+        (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
+        (yearSel === 'All' || x.year === parseInt(yearSel)) &&
+        x.avgSpent >= avgMin && x.avgSpent <= avgMax &&
+        x.totalSpent >= totMin && x.totalSpent <= totMax &&
+        x.daysAgo >= lastMin && x.daysAgo <= lastMax &&
+        x.orders >= ordMin && x.orders <= ordMax &&
+        (!lostOnly || x.daysAgo > 90) &&
+        (!keyword || complaints.some(c => c.phone === x.phone && (
+          (c.details   || '').toLowerCase().includes(keyword) ||
+          (c.category  || '').toLowerCase().includes(keyword)
+        ))) &&
+        x.complaintCount >= compMin
+      );
+      list.sort((a, b) => b.orders - a.orders);
+      drawTable(list);
     }
 
     function resetFilters() {
@@ -880,8 +917,38 @@
       applyFilters();
     }
 
-    // Initialize
-    setupEventListeners();
+    function drawTable(data) {
+      const tbody = document.querySelector('#mainTable tbody');
+      tbody.innerHTML = '';
+      data.forEach(r => {
+        const tr = document.createElement('tr');
+        
+        // Determine status badge based on days ago
+        let statusClass = 'status-active';
+        let statusText = r.daysAgo;
+        if (r.daysAgo > 90) {
+          statusClass = 'status-inactive';
+        } else if (r.daysAgo > 60) {
+          statusClass = 'status-warning';
+        }
+        
+        // Add complaints-high class if complaint count is high
+        const rowClass = r.complaintCount >= 3 ? 'complaints-high' : '';
+        
+        tr.className = rowClass;
+        tr.innerHTML = `
+          <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
+          <td>${r.name}</td>
+          <td>${r.orders}</td>
+          <td>${formatCurrency(r.totalSpent)}</td>
+          <td>${formatCurrency(r.avgSpent)}</td>
+          <td>${r.lastOrder.toLocaleDateString()}</td>
+          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+          <td>${r.complaintCount > 0 ? `<a href="complaints.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.complaintCount}</a>` : 0}</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('stats').textContent = `Showing ${data.length.toLocaleString()} customers`;
+    }
   </script>
 </body>
 </html>
