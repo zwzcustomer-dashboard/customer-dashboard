@@ -34,7 +34,7 @@ body {
   min-height: 100vh;
 }
 
-/* ----------  HEADER & UPLOAD  ---------- */
+/* ----------  HEADER & REVENUE CARD  ---------- */
 .header-container {
   text-align: center;
   margin-bottom: 2rem;
@@ -56,8 +56,94 @@ h1 {
   color: var(--text-secondary);
   font-size: 1.1rem;
   font-weight: 400;
+  margin-bottom: 1.5rem;
 }
 
+/* Revenue Card */
+.revenue-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.revenue-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+}
+
+.revenue-label {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.revenue-amount {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0;
+  position: relative;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.revenue-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+  position: relative;
+}
+
+/* KPI Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+  border-left: 4px solid var(--primary);
+  transition: var(--transition);
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.kpi-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ----------  UPLOAD ROW  ---------- */
 .upload-box {
   display: flex;
   align-items: center;
@@ -114,22 +200,27 @@ h1 {
   padding: 2rem;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(10px);
   border: 1px solid var(--border-light);
 }
 
-.controls label {
+.filter-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 140px;
+  min-width: 150px;
   flex: 1;
 }
 
-.controls input, .controls select {
+.filter-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-input {
   padding: 0.75rem 1rem;
   border: 2px solid var(--border);
   border-radius: var(--radius-sm);
@@ -138,7 +229,7 @@ h1 {
   background: var(--surface);
 }
 
-.controls input:focus, .controls select:focus {
+.filter-input:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
@@ -152,7 +243,8 @@ h1 {
   min-width: 200px;
 }
 
-button {
+/* Buttons */
+.btn {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   color: #fff;
   border: none;
@@ -168,28 +260,24 @@ button {
   box-shadow: var(--shadow);
 }
 
-button:hover {
+.btn:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
-button:active {
-  transform: translateY(0);
-}
-
-button.secondary {
+.btn-secondary {
   background: transparent;
   color: var(--text-secondary);
   border: 2px solid var(--border);
 }
 
-button.secondary:hover {
+.btn-secondary:hover {
   background: var(--background);
   border-color: var(--primary);
   color: var(--primary);
 }
 
-/* ----------  STATS & TABLE  ---------- */
+/* ----------  TABLE  ---------- */
 .stats-container {
   background: var(--surface);
   padding: 1.5rem 2rem;
@@ -262,80 +350,50 @@ tbody tr:nth-child(even) {
   background: #fafbff;
 }
 
-tbody tr:nth-child(even):hover {
-  background: #f8faff;
-}
-
 td {
   padding: 1.25rem 1rem;
   color: var(--text-primary);
   font-weight: 500;
 }
 
-/* Style numeric columns */
+/* Status badges */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Complaints indicator */
+.complaints-high {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+}
+
+/* Numeric columns styling */
 td:nth-child(3), /* Orders */
 td:nth-child(4), /* Total */
-td:nth-child(5), /* Avg */
-td:nth-child(7), /* Days ago */
-td:nth-child(8) { /* Complaints */
+td:nth-child(5) { /* Avg */
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-weight: 600;
   color: var(--text-primary);
-}
-
-/* Status indicators for Days ago */
-td:nth-child(7) {
-  position: relative;
-  padding-left: 1.5rem;
-}
-
-td:nth-child(7)::before {
-  content: '';
-  position: absolute;
-  left: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e; /* Default green */
-}
-
-td:nth-child(7):contains("60")::before,
-td:nth-child(7):contains("350")::before {
-  background: #ef4444; /* Red for high numbers */
-}
-
-td:nth-child(7):contains("3")::before,
-td:nth-child(7):contains("2")::before {
-  background: #f59e0b; /* Amber for medium numbers */
-}
-
-a {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 600;
-  transition: var(--transition);
-  position: relative;
-}
-
-a:hover {
-  color: var(--primary-dark);
-}
-
-a::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -2px;
-  left: 0;
-  background: var(--primary);
-  transition: var(--transition);
-}
-
-a:hover::after {
-  width: 100%;
 }
 
 /* ----------  MOBILE RESPONSIVE  ---------- */
@@ -348,13 +406,17 @@ a:hover::after {
     font-size: 2rem;
   }
   
+  .revenue-amount {
+    font-size: 2.5rem;
+  }
+  
   .controls {
     flex-direction: column;
     gap: 1rem;
     padding: 1.5rem;
   }
   
-  .controls label {
+  .filter-group {
     min-width: 100%;
   }
   
@@ -377,16 +439,13 @@ a:hover::after {
     padding: 1rem 0.75rem;
     font-size: 0.9rem;
   }
-}
-
-/* Loading animation */
-@keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
-}
-
-.loading {
-  animation: shimmer 1.5s infinite;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200px 100%;
+  
+  .kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .kpi-value {
+    font-size: 1.5rem;
+  }
 }
