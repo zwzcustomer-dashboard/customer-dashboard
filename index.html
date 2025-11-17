@@ -688,10 +688,10 @@
         </div>
         
         <div class="filter-actions">
-          <button class="btn" onclick="applyFilters()">
+          <button class="btn" id="applyFiltersBtn">
             Apply Filters
           </button>
-          <button class="btn btn-secondary" onclick="resetFilters()">
+          <button class="btn btn-secondary" id="resetFiltersBtn">
             Reset All
           </button>
         </div>
@@ -747,26 +747,32 @@
       'talabat'
     ];
 
-    /* ----------  LOAD + NORMALISE + DEBUG  ---------- */
-    Promise.all([
-      fetch('data.json').then(r => r.json()),
-      fetch('complaints.json').then(r => r.json())
-    ])
-    .then(([dataRows, compRows]) => {
-      rawRows    = dataRows.map(r => ({...r, [COL_PHONE]: (r[COL_PHONE] || '').toString().trim()}));
-      complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
-      console.log('data phones  :', [...new Set(rawRows.map(r=>r[COL_PHONE]))].slice(0,5));
-      console.log('compl phones :', [...new Set(complaints.map(c=>c.phone))].slice(0,5));
-      aggregate();
-      populateDropdowns();
-      applyFilters();
-      updateKPICards();
-      setStatus('Ready.', 'green');
-    })
-    .catch(err => {
-      console.error(err);
-      setStatus('Error loading JSON files', 'red');
-    });
+    /* ----------  INITIALIZE DASHBOARD  ---------- */
+    function initializeDashboard() {
+      // Load data and set up event listeners
+      Promise.all([
+        fetch('data.json').then(r => r.json()),
+        fetch('complaints.json').then(r => r.json())
+      ])
+      .then(([dataRows, compRows]) => {
+        rawRows    = dataRows.map(r => ({...r, [COL_PHONE]: (r[COL_PHONE] || '').toString().trim()}));
+        complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
+        console.log('data phones  :', [...new Set(rawRows.map(r=>r[COL_PHONE]))].slice(0,5));
+        console.log('compl phones :', [...new Set(complaints.map(c=>c.phone))].slice(0,5));
+        aggregate();
+        populateDropdowns();
+        applyFilters();
+        updateKPICards();
+        setStatus('Ready.', 'green');
+      })
+      .catch(err => {
+        console.error(err);
+        setStatus('Error loading JSON files', 'red');
+      });
+
+      // Set up event listeners
+      setupEventListeners();
+    }
 
     /* ----------  STATUS  ---------- */
     function setStatus(msg, color = 'black') {
@@ -855,17 +861,32 @@
       document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
     }
 
-    /* ----------  LIVE FILTERS  ---------- */
+    /* ----------  EVENT LISTENERS SETUP  ---------- */
     function setupEventListeners() {
-      ['restFilter','yearFilter','avgMin','avgMax','totMin','totMax','lastMin','lastMax','ordMin','ordMax','complaintKeyword','compMin']
-        .forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
+      // Apply Filters button click
+      document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
       
+      // Reset Filters button click
+      document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
+      
+      // Enter key support for all filter inputs
+      const filterInputs = document.querySelectorAll('.filter-input');
+      filterInputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            applyFilters();
+          }
+        });
+      });
+      
+      // Real-time filtering for dropdowns and checkboxes
+      document.getElementById('restFilter').addEventListener('change', applyFilters);
+      document.getElementById('yearFilter').addEventListener('change', applyFilters);
+      document.getElementById('complaintKeyword').addEventListener('change', applyFilters);
       document.getElementById('lostOnly').addEventListener('change', applyFilters);
     }
 
-    // Initialize event listeners when DOM is loaded
-    document.addEventListener('DOMContentLoaded', setupEventListeners);
-
+    /* ----------  FILTER FUNCTIONS  ---------- */
     function applyFilters() {
       const restSel  = document.getElementById('restFilter').value;
       const yearSel  = document.getElementById('yearFilter').value;
@@ -895,6 +916,7 @@
         ))) &&
         x.complaintCount >= compMin
       );
+      
       list.sort((a, b) => b.orders - a.orders);
       drawTable(list);
     }
@@ -949,6 +971,9 @@
       });
       document.getElementById('stats').textContent = `Showing ${data.length.toLocaleString()} customers`;
     }
+
+    // Initialize the dashboard when the page loads
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
   </script>
 </body>
 </html>
