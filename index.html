@@ -559,7 +559,7 @@
   <!-- Revenue Card -->
   <div class="revenue-card">
     <div class="revenue-label">TOTAL REVENUE EARNED</div>
-    <div class="revenue-amount" id="totalRevenue">EGP 14,827,893.50</div>
+    <div class="revenue-amount" id="totalRevenue">EGP 0.00</div>
     <div class="revenue-subtitle">Lifetime customer spending</div>
   </div>
 
@@ -817,25 +817,43 @@
 
     /* ----------  UPDATE KPI CARDS  ---------- */
     function updateKPICards() {
-      // Total Revenue
-      const totalRevenue = aggData.reduce((sum, customer) => sum + customer.totalSpent, 0);
+      // Total Revenue: Sum of all order amounts
+      const totalRevenue = rawRows.reduce((sum, order) => {
+        const amount = parseFloat(order[COL_TOTAL]) || 0;
+        return sum + amount;
+      }, 0);
       document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
       
-      // Total Customers
-      document.getElementById('totalCustomers').textContent = aggData.length.toLocaleString();
+      // Total Customers: Count of unique phone numbers
+      const uniquePhones = [...new Set(rawRows.map(r => r[COL_PHONE]).filter(Boolean))];
+      document.getElementById('totalCustomers').textContent = uniquePhones.length.toLocaleString();
       
-      // Average Order Value
-      const totalOrders = aggData.reduce((sum, customer) => sum + customer.orders, 0);
-      const avgOrderValue = totalRevenue / totalOrders;
+      // Average Order Value: Total Revenue / Total Customers
+      const avgOrderValue = totalRevenue / uniquePhones.length;
       document.getElementById('avgOrderValue').textContent = formatCurrency(avgOrderValue);
       
-      // Customers with Complaints
-      const customersWithComplaints = aggData.filter(c => c.complaintCount > 0).length;
-      const complaintPercentage = ((customersWithComplaints / aggData.length) * 100).toFixed(1);
+      // Percentage with Complaints: (Customers with complaints / Total Customers) * 100
+      const customersWithComplaints = [...new Set(complaints.map(c => c.phone).filter(Boolean))].length;
+      const complaintPercentage = uniquePhones.length > 0 ? 
+        ((customersWithComplaints / uniquePhones.length) * 100).toFixed(1) : 0;
       document.getElementById('withComplaints').textContent = `${complaintPercentage}%`;
       
-      // Lost Customers (90+ days)
-      const lostCustomers = aggData.filter(c => c.daysAgo > 90).length;
+      // Lost Customers: Customers who haven't ordered in 90+ days
+      const customerLastOrder = {};
+      rawRows.forEach(order => {
+        const phone = order[COL_PHONE];
+        if (!phone) return;
+        const orderDate = new Date(order[COL_DATE] || '');
+        if (!customerLastOrder[phone] || orderDate > customerLastOrder[phone]) {
+          customerLastOrder[phone] = orderDate;
+        }
+      });
+      
+      const lostCustomers = Object.values(customerLastOrder).filter(lastOrder => {
+        const daysSinceLastOrder = Math.floor((today - lastOrder) / 864e5);
+        return daysSinceLastOrder > 90;
+      }).length;
+      
       document.getElementById('lostCustomers').textContent = lostCustomers.toLocaleString();
     }
 
