@@ -143,51 +143,14 @@ h1 {
   letter-spacing: 0.05em;
 }
 
-/* ----------  UPLOAD ROW  ---------- */
-.upload-box {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
+/* Status Message */
+#status {
+  margin-bottom: 1rem;
+  font-weight: 500;
+  padding: 1rem;
   background: var(--surface);
-  padding: 1.5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
-  border: 2px dashed var(--border);
-  transition: var(--transition);
-}
-
-.upload-box:hover {
-  border-color: var(--primary);
-  box-shadow: var(--shadow-md);
-}
-
-.upload-label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  background: var(--primary);
-  color: white;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.upload-label:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-#fileName {
-  color: var(--text-primary);
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  background: var(--background);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
 }
 
 /* ----------  FILTER BAR  ---------- */
@@ -215,9 +178,6 @@ h1 {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .filter-input {
@@ -237,10 +197,47 @@ h1 {
 
 .filter-actions {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
-  align-items: flex-end;
+  align-items: flex-start;
   flex: 1;
   min-width: 200px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Buttons */
@@ -248,13 +245,13 @@ h1 {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   color: #fff;
   border: none;
-  padding: 0.875rem 2rem;
+  padding: 0.875rem 1.5rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
   transition: var(--transition);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   box-shadow: var(--shadow);
@@ -387,13 +384,17 @@ td {
   border-left: 3px solid #ef4444;
 }
 
-/* Numeric columns styling */
-td:nth-child(3), /* Orders */
-td:nth-child(4), /* Total */
-td:nth-child(5) { /* Avg */
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+/* Links */
+a {
+  color: var(--primary);
+  text-decoration: none;
   font-weight: 600;
-  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
 }
 
 /* ----------  MOBILE RESPONSIVE  ---------- */
@@ -423,12 +424,6 @@ td:nth-child(5) { /* Avg */
   .filter-actions {
     flex-direction: column;
     min-width: 100%;
-  }
-  
-  .upload-box {
-    flex-direction: column;
-    align-items: stretch;
-    text-align: center;
   }
   
   .table-container {
