@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Customer Order History</title>
+  <title>Customer Complaint Details</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -80,45 +80,37 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Customer Summary */
-    .customer-summary {
+    /* Customer Info */
+    .customer-info {
       background: var(--surface);
-      padding: 2rem;
+      padding: 1.5rem 2rem;
       border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow);
       margin-bottom: 2rem;
       border-left: 4px solid var(--primary);
     }
 
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .summary-card {
-      text-align: center;
-      padding: 1.5rem;
-      background: #f8fffe;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-    }
-
-    .summary-value {
-      font-size: 1.5rem;
-      font-weight: 800;
+    .customer-info h2 {
       color: var(--primary);
       margin-bottom: 0.5rem;
     }
 
-    .summary-label {
-      font-size: 0.9rem;
+    .customer-info p {
       color: var(--text-secondary);
-      font-weight: 600;
+      margin: 0.25rem 0;
     }
 
-    /* Orders Table */
+    /* Section Headers */
+    .section-header {
+      color: var(--primary);
+      margin: 2rem 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* Tables */
     .table-container {
       background: var(--surface);
       border-radius: var(--radius);
@@ -182,17 +174,46 @@
       color: #065f46;
     }
 
-    /* Links */
-    a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition);
+    .status-resolved {
+      background: #d1fae5;
+      color: #065f46;
     }
 
-    a:hover {
-      color: var(--primary-dark);
-      text-decoration: underline;
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-open {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Resolution Details */
+    .resolution-details {
+      background: #f8fffe;
+      padding: 1.5rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    .resolution-text {
+      line-height: 1.6;
+      white-space: pre-wrap;
+      direction: rtl;
+      text-align: right;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .no-data {
+      text-align: center;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      background: #f8fffe;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
     }
 
     /* Loading */
@@ -214,12 +235,13 @@
         align-items: flex-start;
       }
       
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-      
       .table-container {
         overflow-x: auto;
+      }
+      
+      th, td {
+        padding: 1rem 0.75rem;
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -227,29 +249,80 @@
 <body>
   <div class="header">
     <a href="index.html" class="back-btn">← Back to Dashboard</a>
-    <h1>Customer Order History</h1>
+    <h1>Customer Complaint Details</h1>
   </div>
 
-  <div id="customerSummary" class="customer-summary">
-    <div class="loading">Loading customer data...</div>
-  </div>
+  <div id="loading" class="loading">Loading customer complaint details...</div>
 
-  <div class="table-container">
-    <table id="ordersTable">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Restaurant</th>
-          <th>Amount</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td colspan="4" class="loading">Loading orders...</td>
-        </tr>
-      </tbody>
-    </table>
+  <div id="content" style="display: none;">
+    <!-- Customer Information -->
+    <div id="customerInfo" class="customer-info">
+      <h2 id="customerName">Loading...</h2>
+      <p id="customerPhone">Phone: Loading...</p>
+    </div>
+
+    <!-- Order Details -->
+    <h2 class="section-header">Order Details</h2>
+    <div class="table-container">
+      <table id="orderTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Restaurant</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4" class="loading">Loading order details...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Complaint Details -->
+    <h2 class="section-header">Complaint Details</h2>
+    <div class="table-container">
+      <table id="complaintTable">
+        <thead>
+          <tr>
+            <th>Complaint Date</th>
+            <th>Details</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="3" class="loading">Loading complaint details...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Resolution Details -->
+    <h2 class="section-header">Resolution</h2>
+    <div class="table-container">
+      <table id="resolutionTable">
+        <thead>
+          <tr>
+            <th>Resolution Date</th>
+            <th>Restaurant</th>
+            <th>Resolved By</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4" class="loading">Loading resolution details...</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="resolutionDetails" class="resolution-details">
+        <strong>Resolution Details:</strong>
+        <div id="resolutionText" class="resolution-text">Loading resolution details...</div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -257,89 +330,105 @@
     const urlParams = new URLSearchParams(window.location.search);
     const phone = urlParams.get('phone');
 
-    if (!phone) {
-      document.getElementById('customerSummary').innerHTML = '<div class="loading">No customer phone specified</div>';
-      document.querySelector('#ordersTable tbody').innerHTML = '<tr><td colspan="4">No customer phone specified</td></tr>';
-    } else {
-      // Load and display customer data
-      Promise.all([
-        fetch('data.json').then(r => r.json()),
-        fetch('complaints.json').then(r => r.json())
-      ])
-      .then(([dataRows, compRows]) => {
-        // Filter orders for this customer
+    async function loadCustomerDetails() {
+      if (!phone) {
+        document.getElementById('loading').innerHTML = 'No customer phone specified';
+        return;
+      }
+
+      try {
+        // Load all data
+        const [dataRows, compRows, resolutions] = await Promise.all([
+          fetch('data.json').then(r => r.json()),
+          fetch('complaints.json').then(r => r.json()),
+          fetch('resolutions.json').then(r => r.json())
+        ]);
+
+        // Find customer data
         const customerOrders = dataRows.filter(order => 
           (order['Account Phones'] || '').toString().trim() === phone
         );
-        
-        // Calculate customer summary
-        const totalOrders = customerOrders.length;
-        const totalSpent = customerOrders.reduce((sum, order) => sum + (parseFloat(order['Total Price']) || 0), 0);
-        const avgOrderValue = totalOrders > 0 ? totalSpent / totalOrders : 0;
-        
-        // Get latest order date
-        const latestOrder = customerOrders.length > 0 ? 
-          new Date(Math.max(...customerOrders.map(order => new Date(order['Created'] || '')))) : null;
-        
-        const daysSinceLastOrder = latestOrder ? 
-          Math.floor((new Date() - latestOrder) / 86400000) : 'N/A';
-        
-        // Get complaint count
-        const complaintCount = compRows.filter(complaint => 
+
+        const customerComplaints = compRows.filter(complaint => 
           (complaint.phone || '').toString().trim() === phone
-        ).length;
+        );
 
-        // Update customer summary
-        document.getElementById('customerSummary').innerHTML = `
-          <h2>${customerOrders[0]?.['Account Name'] || 'Unknown Customer'}</h2>
-          <p style="color: var(--text-secondary); margin-bottom: 1rem;">Phone: ${phone}</p>
-          <div class="summary-grid">
-            <div class="summary-card">
-              <div class="summary-value">${totalOrders}</div>
-              <div class="summary-label">Total Orders</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-value">EGP ${totalSpent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-              <div class="summary-label">Total Spent</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-value">EGP ${avgOrderValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-              <div class="summary-label">Avg Order Value</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-value">${complaintCount}</div>
-              <div class="summary-label">Complaints</div>
-            </div>
-            <div class="summary-card">
-              <div class="summary-value">${daysSinceLastOrder}</div>
-              <div class="summary-label">Days Since Last Order</div>
-            </div>
-          </div>
-        `;
+        const customerResolutions = resolutions.filter(resolution => 
+          resolution.phone && resolution.phone.toString().trim() === phone
+        );
 
-        // Update orders table
-        const tbody = document.querySelector('#ordersTable tbody');
-        if (customerOrders.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="4">No orders found for this customer</td></tr>';
+        // Show content
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+
+        // Update customer info
+        const customerName = customerOrders[0]?.['Account Name'] || customerComplaints[0]?.name || 'Unknown Customer';
+        document.getElementById('customerName').textContent = customerName;
+        document.getElementById('customerPhone').textContent = `Phone: ${phone}`;
+
+        // Populate Order Table
+        const orderTbody = document.querySelector('#orderTable tbody');
+        if (customerOrders.length > 0) {
+          // Show the most recent order
+          const recentOrder = customerOrders.sort((a, b) => 
+            new Date(b['Created'] || '') - new Date(a['Created'] || '')
+          )[0];
+          
+          orderTbody.innerHTML = `
+            <tr>
+              <td>${new Date(recentOrder['Created'] || '').toLocaleDateString()}</td>
+              <td>${recentOrder['Resturant'] || recentOrder['Restaurant'] || 'N/A'}</td>
+              <td>EGP ${(parseFloat(recentOrder['Total Price']) || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td><span class="status-badge status-completed">Completed</span></td>
+            </tr>
+          `;
         } else {
-          tbody.innerHTML = customerOrders
-            .sort((a, b) => new Date(b['Created'] || '') - new Date(a['Created'] || ''))
-            .map(order => `
-              <tr>
-                <td>${new Date(order['Created'] || '').toLocaleDateString()}</td>
-                <td>${order['Resturant'] || order['Restaurant'] || 'N/A'}</td>
-                <td>EGP ${(parseFloat(order['Total Price']) || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td><span class="status-badge status-completed">Completed</span></td>
-              </tr>
-            `).join('');
+          orderTbody.innerHTML = '<tr><td colspan="4"><div class="no-data">No orders found</div></td></tr>';
         }
-      })
-      .catch(err => {
-        console.error('Error loading data:', err);
-        document.getElementById('customerSummary').innerHTML = '<div class="loading">Error loading customer data</div>';
-        document.querySelector('#ordersTable tbody').innerHTML = '<tr><td colspan="4">Error loading orders</td></tr>';
-      });
+
+        // Populate Complaint Table
+        const complaintTbody = document.querySelector('#complaintTable tbody');
+        if (customerComplaints.length > 0) {
+          const complaint = customerComplaints[0]; // Show first complaint
+          complaintTbody.innerHTML = `
+            <tr>
+              <td>${complaint.date || 'N/A'}</td>
+              <td>${complaint.details || 'No details provided'}</td>
+              <td><span class="status-badge ${complaint.status === 'Resolved' ? 'status-resolved' : complaint.status === 'Pending' ? 'status-pending' : 'status-open'}">${complaint.status || 'Open'}</span></td>
+            </tr>
+          `;
+        } else {
+          complaintTbody.innerHTML = '<tr><td colspan="3"><div class="no-data">No complaints found</div></td></tr>';
+        }
+
+        // Populate Resolution Table
+        const resolutionTbody = document.querySelector('#resolutionTable tbody');
+        const resolutionText = document.getElementById('resolutionText');
+        
+        if (customerResolutions.length > 0) {
+          const resolution = customerResolutions[0]; // Show first resolution
+          resolutionTbody.innerHTML = `
+            <tr>
+              <td>${resolution.date || 'N/A'}</td>
+              <td>${resolution.Resturant || 'N/A'}</td>
+              <td>${resolution.Resolvedby || 'Call Center Agent'}</td>
+              <td><span class="status-badge status-resolved">${resolution.Status || 'Resolved'}</span></td>
+            </tr>
+          `;
+          resolutionText.textContent = resolution.Resolution || 'No resolution details provided.';
+        } else {
+          resolutionTbody.innerHTML = '<tr><td colspan="4"><div class="no-data">No resolution found</div></td></tr>';
+          resolutionText.textContent = 'No resolution details available.';
+        }
+
+      } catch (error) {
+        console.error('Error loading customer details:', error);
+        document.getElementById('loading').innerHTML = 'Error loading customer details';
+      }
     }
+
+    // Load customer details when page loads
+    loadCustomerDetails();
   </script>
 </body>
 </html>
