@@ -176,6 +176,9 @@
       border: 1px solid var(--border);
       line-height: 1.6;
       white-space: pre-wrap;
+      direction: rtl;
+      text-align: right;
+      font-family: 'Inter', sans-serif;
     }
 
     .no-resolution {
@@ -343,38 +346,46 @@
     // Function to load resolution details
     async function loadResolutionDetails(customerPhone) {
       try {
+        console.log('Loading resolutions for phone:', customerPhone);
         const response = await fetch('resolutions.json');
         const resolutions = await response.json();
+        console.log('All resolutions:', resolutions);
         
-        // Find resolution for this customer
-        const resolution = resolutions.find(res => 
-          res.complaintId === customerPhone || res.phone === customerPhone
-        );
+        // Find resolution for this customer - using the correct field names from your JSON
+        const resolution = resolutions.find(res => {
+          return res.phone && res.phone.toString().trim() === customerPhone;
+        });
+        
+        console.log('Found resolution:', resolution);
         
         const resolutionSection = document.getElementById('resolutionSection');
         const resolutionContent = document.getElementById('resolutionContent');
         
         if (resolution) {
-          // Show resolution section and populate data
+          // Show resolution section and populate data with correct field names
           resolutionSection.style.display = 'block';
           resolutionContent.innerHTML = `
             <div class="resolution-grid">
               <div class="resolution-field">
                 <span class="resolution-label">Resolution Date:</span>
-                <span class="resolution-value">${resolution.resolutionDate || 'N/A'}</span>
+                <span class="resolution-value">${resolution.date || 'Not specified'}</span>
+              </div>
+              <div class="resolution-field">
+                <span class="resolution-label">Restaurant:</span>
+                <span class="resolution-value">${resolution.Resturant || 'Not specified'}</span>
               </div>
               <div class="resolution-field">
                 <span class="resolution-label">Status:</span>
-                <span class="resolution-value" style="color: #28a745; font-weight: 600;">${resolution.status || 'Resolved'}</span>
+                <span class="resolution-value" style="color: #28a745; font-weight: 600;">${resolution.Status || 'Resolved'}</span>
               </div>
               <div class="resolution-field">
                 <span class="resolution-label">Resolved By:</span>
-                <span class="resolution-value">${resolution.resolvedBy || 'Call Center Agent'}</span>
+                <span class="resolution-value">${resolution.Resolvedby || 'Call Center Agent'}</span>
               </div>
             </div>
             <div class="resolution-details">
               <span class="resolution-label">Resolution Details:</span>
-              <div class="resolution-text">${resolution.resolutionDetails || 'No resolution details provided.'}</div>
+              <div class="resolution-text">${resolution.Resolution || 'No resolution details provided.'}</div>
             </div>
           `;
         } else {
@@ -392,7 +403,7 @@
         resolutionSection.style.display = 'block';
         document.getElementById('resolutionContent').innerHTML = `
           <div class="no-resolution">
-            Error loading resolution details.
+            Error loading resolution details. Please check if resolutions.json exists.
           </div>
         `;
       }
