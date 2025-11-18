@@ -252,6 +252,17 @@
       font-style: italic;
     }
 
+    /* Debug Info */
+    .debug-info {
+      background: #fff3cd;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid #ffeaa7;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      color: #856404;
+    }
+
     /* Links */
     a {
       color: var(--primary);
@@ -298,6 +309,8 @@
     <div class="loading">Loading customer information...</div>
   </div>
 
+  <div id="debugInfo" style="display: none;"></div>
+
   <div class="complaints-container" id="complaintsList">
     <div class="loading">Loading complaints...</div>
   </div>
@@ -326,6 +339,36 @@
       });
     }
 
+    // Function to get resolution text from complaint object
+    function getResolution(complaint) {
+      // Try different possible field names for resolution
+      return complaint.resolution || 
+             complaint.resolution_details || 
+             complaint.resolutionDetails ||
+             complaint.resolution_text ||
+             complaint.resolutionText ||
+             complaint.outcome ||
+             complaint.action_taken ||
+             complaint.actionTaken ||
+             'No resolution details available';
+    }
+
+    // Function to get status from complaint object
+    function getStatus(complaint) {
+      return complaint.status || 
+             complaint.complaint_status ||
+             complaint.complaintStatus ||
+             'pending';
+    }
+
+    // Function to get priority from complaint object
+    function getPriority(complaint) {
+      return complaint.priority || 
+             complaint.urgency ||
+             complaint.severity ||
+             'medium';
+    }
+
     if (!phone) {
       document.getElementById('customerInfo').innerHTML = '<div class="loading">No customer phone specified</div>';
       document.getElementById('complaintsList').innerHTML = '<div class="loading">No customer phone specified</div>';
@@ -340,6 +383,15 @@
         const customerComplaints = compRows.filter(complaint => 
           (complaint.phone || '').toString().trim() === phone
         );
+
+        // Debug: Show what data we're getting
+        console.log('All complaints data:', compRows);
+        console.log('Filtered complaints for phone:', phone, customerComplaints);
+        
+        if (customerComplaints.length > 0) {
+          console.log('First complaint object:', customerComplaints[0]);
+          console.log('Available fields in first complaint:', Object.keys(customerComplaints[0]));
+        }
 
         // Get customer info from orders
         const customerOrders = dataRows.filter(order => 
@@ -376,8 +428,10 @@
             .map(complaint => {
               const matchingOrder = findMatchingOrder(complaint, customerOrders);
               const complaintDate = new Date(complaint.date || '');
-              const status = complaint.status || 'pending';
-              const priority = complaint.priority || 'medium';
+              const status = getStatus(complaint);
+              const priority = getPriority(complaint);
+              const resolution = getResolution(complaint);
+              const hasResolution = resolution && resolution !== 'No resolution details available';
               
               return `
                 <div class="complaint-card">
@@ -411,22 +465,37 @@
                   
                   <div class="complaint-details">
                     <h3>Complaint Details:</h3>
-                    <div class="complaint-text">${complaint.details || 'No details provided'}</div>
+                    <div class="complaint-text">${complaint.details || complaint.complaint_details || 'No details provided'}</div>
                   </div>
                   
-                  ${complaint.resolution ? `
+                  ${hasResolution ? `
                   <div class="resolution-section">
                     <h4>✅ Resolution</h4>
-                    <div class="resolution-text">${complaint.resolution}</div>
+                    <div class="resolution-text">${resolution}</div>
+                    ${complaint.resolved_date ? `
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #065f46;">
+                      Resolved on: ${new Date(complaint.resolved_date).toLocaleDateString()}
+                    </div>
+                    ` : ''}
                   </div>
                   ` : ''}
                   
-                  ${complaint.follow_up ? `
+                  ${complaint.follow_up || complaint.follow_up_actions ? `
                   <div class="complaint-details">
                     <h3>Follow-up Actions:</h3>
-                    <div class="complaint-text">${complaint.follow_up}</div>
+                    <div class="complaint-text">${complaint.follow_up || complaint.follow_up_actions}</div>
                   </div>
                   ` : ''}
+
+                  <!-- Debug information for this complaint -->
+                  <div class="debug-info" style="display: none;">
+                    <strong>Debug Info for this complaint:</strong><br>
+                    Available fields: ${Object.keys(complaint).join(', ')}<br>
+                    Resolution field: ${complaint.resolution ? 'EXISTS' : 'MISSING'}<br>
+                    Resolution value: "${complaint.resolution}"<br>
+                    Status: ${status}<br>
+                    Priority: ${priority}
+                  </div>
                 </div>
               `;
             }).join('');
@@ -438,6 +507,17 @@
         document.getElementById('complaintsList').innerHTML = '<div class="loading">Error loading complaints</div>';
       });
     }
+
+    // Add debug toggle (hold Ctrl+D to show debug info)
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        const debugInfos = document.querySelectorAll('.debug-info');
+        debugInfos.forEach(debug => {
+          debug.style.display = debug.style.display === 'none' ? 'block' : 'none';
+        });
+      }
+    });
   </script>
 </body>
 </html>
