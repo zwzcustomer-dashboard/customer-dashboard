@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Complaint Details</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ----------  RESET / BASE  ---------- */
+    :root {
+      --primary: #00a79d;
+      --primary-dark: #008c83;
+      --primary-light: #00b8ad;
+      --surface: #ffffff;
+      --background: #f8fffe;
+      --text-primary: #1a3a3a;
+      --text-secondary: #5a7a7a;
+      --text-muted: #8a9e9e;
+      --border: #e0f0ee;
+      --border-light: #f0f8f7;
+      --shadow: 0 1px 3px 0 rgba(0, 167, 157, 0.1), 0 1px 2px 0 rgba(0, 167, 157, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 167, 157, 0.1), 0 2px 4px -1px rgba(0, 167, 157, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 167, 157, 0.1), 0 4px 6px -2px rgba(0, 167, 157, 0.05);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { 
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f0fffd 0%, #f8fffe 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .back-btn {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+
+    .back-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Section Headers */
+    .section-header {
+      color: var(--primary);
+      margin: 2rem 0 1rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* Tables */
+    .table-container {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      font-size: 0.95rem;
+    }
+
+    thead {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    th {
+      padding: 1.25rem 1rem;
+      text-align: left;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tbody tr {
+      transition: var(--transition);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    tbody tr:hover {
+      background: #f5fffe;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f8fffe;
+    }
+
+    td {
+      padding: 1.25rem 1rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* Status badges */
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-completed {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-resolved {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    /* Resolution Section */
+    .resolution-text {
+      background: #f8fffe;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      direction: rtl;
+      text-align: right;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .no-resolution {
+      text-align: center;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      background: #f8fffe;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+      
+      .table-container {
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    <h1>Complaint Details</h1>
+  </div>
+
+  <div id="loading" class="loading">Loading complaint details...</div>
+
+  <div id="content" style="display: none;">
+    <!-- Table 1: Order with Complaint -->
+    <h2 class="section-header">1. Order with Complaint</h2>
+    <div class="table-container">
+      <table id="orderTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Restaurant</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4" class="loading">Loading order details...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table 2: Complaint Details -->
+    <h2 class="section-header">2. Complaint Details</h2>
+    <div class="table-container">
+      <table id="complaintTable">
+        <thead>
+          <tr>
+            <th>Complaint Date</th>
+            <th>Customer Name</th>
+            <th>Phone</th>
+            <th>Complaint Details</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="5" class="loading">Loading complaint details...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table 3: Resolution -->
+    <h2 class="section-header">3. Resolution</h2>
+    <div class="table-container">
+      <table id="resolutionTable">
+        <thead>
+          <tr>
+            <th>Resolution Date</th>
+            <th>Restaurant</th>
+            <th>Resolved By</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4" class="loading">Loading resolution details...</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="resolutionDetails" style="padding: 1.5rem;">
+        <!-- Resolution details will be shown here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get phone number from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const phone = urlParams.get('phone');
+
+    async function loadComplaintDetails() {
+      if (!phone) {
+        document.getElementById('loading').innerHTML = 'No customer phone specified';
+        return;
+      }
+
+      try {
+        // Load all data
+        const [dataRows, compRows, resolutions] = await Promise.all([
+          fetch('data.json').then(r => r.json()),
+          fetch('complaints.json').then(r => r.json()),
+          fetch('resolutions.json').then(r => r.json())
+        ]);
+
+        // Find customer complaints
+        const customerComplaints = compRows.filter(complaint => 
+          (complaint.phone || '').toString().trim() === phone
+        );
+
+        if (customerComplaints.length === 0) {
+          document.getElementById('loading').innerHTML = 'No complaints found for this customer';
+          return;
+        }
+
+        // Use the first complaint (you can modify this to handle multiple complaints)
+        const complaint = customerComplaints[0];
+
+        // Find customer orders
+        const customerOrders = dataRows.filter(order => 
+          (order['Account Phones'] || '').toString().trim() === phone
+        );
+
+        // Find resolution
+        const resolution = resolutions.find(res => 
+          res.phone && res.phone.toString().trim() === phone
+        );
+
+        // Show content
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+
+        // Populate Table 1: Order with Complaint
+        const orderTbody = document.querySelector('#orderTable tbody');
+        if (customerOrders.length > 0) {
+          // Use the most recent order or find order by date matching complaint
+          const order = customerOrders[0]; // Using first order, you can add date matching logic
+          orderTbody.innerHTML = `
+            <tr>
+              <td>${new Date(order['Created'] || '').toLocaleDateString()}</td>
+              <td>${order['Resturant'] || order['Restaurant'] || 'N/A'}</td>
+              <td>EGP ${(parseFloat(order['Total Price']) || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td><span class="status-badge status-completed">Completed</span></td>
+            </tr>
+          `;
+        } else {
+          orderTbody.innerHTML = '<tr><td colspan="4">No orders found</td></tr>';
+        }
+
+        // Populate Table 2: Complaint Details
+        const complaintTbody = document.querySelector('#complaintTable tbody');
+        complaintTbody.innerHTML = `
+          <tr>
+            <td>${complaint.date || 'N/A'}</td>
+            <td>${complaint.name || 'N/A'}</td>
+            <td>${complaint.phone || 'N/A'}</td>
+            <td>${complaint.details || 'No details provided'}</td>
+            <td><span class="status-badge ${complaint.status === 'Resolved' ? 'status-resolved' : 'status-pending'}">${complaint.status || 'Open'}</span></td>
+          </tr>
+        `;
+
+        // Populate Table 3: Resolution
+        const resolutionTbody = document.querySelector('#resolutionTable tbody');
+        const resolutionDetails = document.getElementById('resolutionDetails');
+
+        if (resolution) {
+          resolutionTbody.innerHTML = `
+            <tr>
+              <td>${resolution.date || 'N/A'}</td>
+              <td>${resolution.Resturant || 'N/A'}</td>
+              <td>${resolution.Resolvedby || 'Call Center Agent'}</td>
+              <td><span class="status-badge status-resolved">${resolution.Status || 'Resolved'}</span></td>
+            </tr>
+          `;
+          resolutionDetails.innerHTML = `
+            <h3 style="color: var(--text-secondary); margin-bottom: 0.5rem;">Resolution Details:</h3>
+            <div class="resolution-text">${resolution.Resolution || 'No resolution details provided.'}</div>
+          `;
+        } else {
+          resolutionTbody.innerHTML = '<tr><td colspan="4">No resolution found</td></tr>';
+          resolutionDetails.innerHTML = '<div class="no-resolution">No resolution found for this complaint</div>';
+        }
+
+      } catch (error) {
+        console.error('Error loading complaint details:', error);
+        document.getElementById('loading').innerHTML = 'Error loading complaint details';
+      }
+    }
+
+    // Load complaint details when page loads
+    loadComplaintDetails();
+  </script>
+</body>
+</html>
