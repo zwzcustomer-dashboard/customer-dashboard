@@ -200,7 +200,7 @@ function drawTable(data) {
       <td>${formatCurrency(r.avgSpent)}</td>
       <td>${r.lastOrder.toLocaleDateString()}</td>
       <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-      <td>${r.complaintCount > 0 ? `<a href="complaints.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.complaintCount}</a>` : 0}</td>`;
+      <td>${r.complaintCount > 0 ? `<a href="complaint-details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.complaintCount}</a>` : 0}</td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('stats').textContent = `Showing ${data.length.toLocaleString()} customers`;
