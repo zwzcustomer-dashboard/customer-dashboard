@@ -459,11 +459,65 @@
       text-decoration: none;
       font-weight: 600;
       transition: var(--transition);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(0, 167, 157, 0.1);
+      border: 1px solid rgba(0, 167, 157, 0.2);
     }
 
     a:hover {
       color: var(--primary-dark);
-      text-decoration: underline;
+      background: rgba(0, 167, 157, 0.15);
+      border-color: var(--primary);
+      text-decoration: none;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 167, 157, 0.2);
+    }
+
+    /* Phone number links */
+    .phone-link {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, rgba(0, 167, 157, 0.1) 0%, rgba(0, 167, 157, 0.05) 100%);
+      border: 1px solid rgba(0, 167, 157, 0.3);
+      border-radius: 8px;
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .phone-link:hover {
+      background: linear-gradient(135deg, rgba(0, 167, 157, 0.2) 0%, rgba(0, 167, 157, 0.1) 100%);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 167, 157, 0.2);
+    }
+
+    /* Complaint links */
+    .complaint-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0.25rem 0.75rem;
+      background: linear-gradient(135deg, rgba(0, 167, 157, 0.15) 0%, rgba(0, 167, 157, 0.1) 100%);
+      border: 1px solid rgba(0, 167, 157, 0.3);
+      border-radius: 20px;
+      color: var(--primary-dark);
+      font-weight: 700;
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 0.8rem;
+    }
+
+    .complaint-link:hover {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 167, 157, 0.3);
     }
 
     /* ----------  MOBILE RESPONSIVE  ---------- */
@@ -532,6 +586,18 @@
       .kpi-value {
         font-size: 1.5rem;
       }
+
+      .phone-link {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9rem;
+      }
+
+      .complaint-link {
+        min-width: 1.75rem;
+        height: 1.75rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -546,6 +612,18 @@
       .filter-input {
         padding: 0.625rem 0.75rem;
         font-size: 0.9rem;
+      }
+
+      .phone-link {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+      }
+
+      .complaint-link {
+        min-width: 1.5rem;
+        height: 1.5rem;
+        padding: 0.125rem 0.375rem;
+        font-size: 0.7rem;
       }
     }
   </style>
@@ -977,14 +1055,14 @@
         
         tr.className = rowClass;
         tr.innerHTML = `
-          <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
+          <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank" class="phone-link">${r.phone}</a></td>
           <td>${r.name}</td>
           <td>${r.orders}</td>
           <td>${formatCurrency(r.totalSpent)}</td>
           <td>${formatCurrency(r.avgSpent)}</td>
           <td>${r.lastOrder.toLocaleDateString()}</td>
           <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          <td>${r.complaintCount > 0 ? `<a href="complaints.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.complaintCount}</a>` : 0}</td>`;
+          <td>${r.complaintCount > 0 ? `<a href="complaints.html?phone=${encodeURIComponent(r.phone)}" target="_blank" class="complaint-link">${r.complaintCount}</a>` : 0}</td>`;
         tbody.appendChild(tr);
       });
       document.getElementById('stats').textContent = `Showing ${data.length.toLocaleString()} customers`;
