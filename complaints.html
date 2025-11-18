@@ -73,6 +73,65 @@
       });
     }
 
+    // Function to find resolution for a complaint - UPDATED FOR YOUR JSON STRUCTURE
+    function findResolution(complaint, resolutions) {
+      const complaintPhone = normalizePhone(complaint.phone || '');
+      const complaintDate = new Date(complaint.date);
+      
+      console.log(`Looking for resolution for phone: ${complaintPhone}, date: ${complaintDate.toDateString()}`);
+      
+      // Try to find matching resolution
+      return resolutions.find(resolution => {
+        const resolutionPhone = normalizePhone(resolution.phone || '');
+        const resolutionDate = new Date(resolution.date || '');
+        
+        console.log(`Checking resolution - phone: ${resolutionPhone}, date: ${resolutionDate.toDateString()}`);
+        
+        // Match by phone number (since dates might not align perfectly)
+        if (resolutionPhone === complaintPhone) {
+          console.log('✅ Phone match found for resolution!');
+          return true;
+        }
+        
+        return false;
+      });
+    }
+
+    // Function to get resolution text from resolution object - UPDATED FOR YOUR FIELDS
+    function getResolutionText(resolution) {
+      if (!resolution) return null;
+      
+      console.log('Resolution object fields:', Object.keys(resolution));
+      
+      // Use your specific field names
+      const resolutionText = resolution.Resolution || 
+             resolution.resolution || 
+             resolution.resolution_details || 
+             null;
+      
+      console.log('Found resolution text:', resolutionText);
+      return resolutionText;
+    }
+
+    // Function to get status from resolution - UPDATED FOR YOUR FIELDS
+    function getStatus(resolution) {
+      if (!resolution) return 'pending';
+      
+      return resolution.Status || 
+             resolution.status || 
+             'resolved'; // Default to resolved if resolution exists
+    }
+
+    // Function to get resolved by - UPDATED FOR YOUR FIELDS
+    function getResolvedBy(resolution) {
+      if (!resolution) return null;
+      
+      return resolution.Resolvedby || 
+             resolution.resolved_by || 
+             resolution.ResolvedBy ||
+             null;
+    }
+
     // Function to format currency
     function formatCurrency(amount) {
       return 'EGP ' + (amount || 0).toLocaleString('en-US', {
@@ -83,7 +142,7 @@
 
     if (!phone) {
       document.getElementById('customerInfo').innerHTML = '<div class="loading">No customer phone specified</div>';
-      document.getElementById('complaintsList').innerHTML = '<div class="loading">No customer phone specified</div>';
+      document.getElementById('complaintsList').innerHTML = '<div class="loading'>No customer phone specified</div>';
     } else {
       // Load data from files
       Promise.all([
@@ -106,8 +165,14 @@
           normalizePhone(complaint.phone || '') === normalizedSearchPhone
         );
 
+        // Filter resolutions for this customer
+        const customerResolutions = resolutionRows.filter(resolution => 
+          normalizePhone(resolution.phone || '') === normalizedSearchPhone
+        );
+
         console.log('=== CUSTOMER DATA ===');
         console.log('Customer complaints:', customerComplaints.length, customerComplaints);
+        console.log('Customer resolutions:', customerResolutions.length, customerResolutions);
         console.log('Searching for phone:', normalizedSearchPhone);
 
         // Get customer info from orders
@@ -133,20 +198,13 @@
               <strong>Total Complaints:</strong> ${customerComplaints.length}
             </div>
             <div>
-              <strong>Resolutions File:</strong> 
-              <span style="color: ${resolutionRows.length > 0 ? 'green' : 'red'}">
-                ${resolutionRows.length > 0 ? '✅ Loaded' : '❌ Not Found/Invalid'}
-              </span>
+              <strong>Resolutions Found:</strong> ${customerResolutions.length}
             </div>
           </div>
-          ${resolutionRows.length === 0 ? `
-          <div style="margin-top: 1rem; padding: 1rem; background: #fee2e2; border-radius: 8px; color: #991b1b;">
-            <strong>⚠️ Resolution File Issue:</strong><br>
-            The resolution.json file could not be loaded. This could be because:<br>
-            • The file doesn't exist<br>
-            • The file contains invalid JSON<br>
-            • The file path is incorrect<br>
-            • The server returned an error page instead of JSON
+          ${customerResolutions.length > 0 ? `
+          <div style="margin-top: 1rem; padding: 1rem; background: #f0f8f7; border-radius: 8px;">
+            <strong>✅ Resolution Data Found!</strong><br>
+            Found ${customerResolutions.length} resolution record(s) for this phone number.
           </div>
           ` : ''}
         `;
@@ -160,15 +218,26 @@
             .sort((a, b) => new Date(b.date || '') - new Date(a.date || ''))
             .map(complaint => {
               const matchingOrder = findMatchingOrder(complaint, customerOrders);
+              const matchingResolution = findResolution(complaint, resolutionRows);
               const complaintDate = new Date(complaint.date || '');
+              const status = getStatus(matchingResolution);
+              const resolutionText = getResolutionText(matchingResolution);
+              const resolvedBy = getResolvedBy(matchingResolution);
+              const hasResolution = resolutionText && resolutionText.trim().length > 0;
               
+              console.log('=== COMPLAINT PROCESSING ===');
+              console.log('Complaint:', complaint);
+              console.log('Matching Resolution:', matchingResolution);
+              console.log('Has Resolution:', hasResolution);
+              console.log('Resolution Text:', resolutionText);
+
               return `
                 <div class="complaint-card">
                   <div class="complaint-header">
                     <span class="complaint-category">${complaint.category || 'Uncategorized'}</span>
                     <span class="complaint-date">${complaintDate.toLocaleDateString()}</span>
-                    <span class="status-badge status-pending">
-                      Pending Resolution
+                    <span class="status-badge ${status === 'resolved' || status === 'Resolved' ? 'status-resolved' : 'status-pending'}">
+                      ${status === 'resolved' || status === 'Resolved' ? 'Resolved' : 'Pending'}
                     </span>
                   </div>
                   
@@ -197,12 +266,36 @@
                     <div class="complaint-text">${complaint.details || complaint.complaint_details || 'No details provided'}</div>
                   </div>
                   
+                  ${hasResolution ? `
+                  <div class="resolution-section">
+                    <h4>✅ Resolution</h4>
+                    <div class="resolution-text">${resolutionText}</div>
+                    ${matchingResolution && matchingResolution.date ? `
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #065f46;">
+                      Resolution Date: ${new Date(matchingResolution.date).toLocaleDateString()}
+                    </div>
+                    ` : ''}
+                    ${resolvedBy ? `
+                    <div style="margin-top: 0.25rem; font-size: 0.8rem; color: #065f46;">
+                      Resolved by: ${resolvedBy}
+                    </div>
+                    ` : ''}
+                    ${matchingResolution && matchingResolution.Resturant ? `
+                    <div style="margin-top: 0.25rem; font-size: 0.8rem; color: #065f46;">
+                      Restaurant: ${matchingResolution.Resturant}
+                    </div>
+                    ` : ''}
+                  </div>
+                  ` : `
                   <div class="complaint-details">
                     <h3>Resolution Status:</h3>
                     <div class="complaint-text" style="background: #fef3c7; border-left-color: #f59e0b;">
-                      ⚠️ Resolution data unavailable - resolution.json file could not be loaded
+                      ${matchingResolution ? 
+                        'Resolution record found but no resolution text available.' : 
+                        'No resolution record found for this complaint.'}
                     </div>
                   </div>
+                  `}
                   
                   ${complaint.follow_up || complaint.follow_up_actions ? `
                   <div class="complaint-details">
@@ -210,6 +303,19 @@
                     <div class="complaint-text">${complaint.follow_up || complaint.follow_up_actions}</div>
                   </div>
                   ` : ''}
+
+                  <!-- Debug information for this complaint -->
+                  <div class="debug-info" style="display: none;">
+                    <strong>Debug Info:</strong><br>
+                    Complaint Phone: ${complaint.phone}<br>
+                    Complaint Date: ${complaintDate.toDateString()}<br>
+                    Has Matching Order: ${!!matchingOrder}<br>
+                    Has Matching Resolution: ${!!matchingResolution}<br>
+                    Resolution Object: ${JSON.stringify(matchingResolution)}<br>
+                    Resolution Text: "${resolutionText}"<br>
+                    Status: ${status}<br>
+                    All Resolution Fields: ${matchingResolution ? Object.keys(matchingResolution).join(', ') : 'N/A'}
+                  </div>
                 </div>
               `;
             }).join('');
