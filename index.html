@@ -8,19 +8,19 @@
   <style>
     /* ----------  RESET / BASE  ---------- */
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #8b5cf6;
+      --primary: #00a79d;
+      --primary-dark: #008c83;
+      --primary-light: #00b8ad;
       --surface: #ffffff;
-      --background: #f8fafc;
-      --text-primary: #1e293b;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --border: #e2e8f0;
-      --border-light: #f1f5f9;
-      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --background: #f8fffe;
+      --text-primary: #1a3a3a;
+      --text-secondary: #5a7a7a;
+      --text-muted: #8a9e9e;
+      --border: #e0f0ee;
+      --border-light: #f0f8f7;
+      --shadow: 0 1px 3px 0 rgba(0, 167, 157, 0.1), 0 1px 2px 0 rgba(0, 167, 157, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 167, 157, 0.1), 0 2px 4px -1px rgba(0, 167, 157, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 167, 157, 0.1), 0 4px 6px -2px rgba(0, 167, 157, 0.05);
       --radius: 12px;
       --radius-sm: 8px;
       --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -36,7 +36,7 @@
       font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
       padding: 2rem;
-      background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+      background: linear-gradient(135deg, #f0fffd 0%, #f8fffe 100%);
       color: var(--text-primary);
       line-height: 1.6;
       min-height: 100vh;
@@ -226,7 +226,7 @@
     .filter-input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      box-shadow: 0 0 0 3px rgba(0, 167, 157, 0.1);
     }
 
     /* Range Inputs */
@@ -407,13 +407,13 @@
     }
 
     tbody tr:hover {
-      background: #f8faff;
+      background: #f5fffe;
       transform: scale(1.002);
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 167, 157, 0.1);
     }
 
     tbody tr:nth-child(even) {
-      background: #fafbff;
+      background: #f8fffe;
     }
 
     td {
@@ -433,8 +433,8 @@
     }
 
     .status-active {
-      background: #dcfce7;
-      color: #166534;
+      background: #d1fae5;
+      color: #065f46;
     }
 
     .status-warning {
