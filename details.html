@@ -351,43 +351,81 @@
         const resolutions = await response.json();
         console.log('All resolutions:', resolutions);
         
-        // Find resolution for this customer - using the correct field names from your JSON
-        const resolution = resolutions.find(res => {
+        // Find resolutions for this customer
+        const matchingResolutions = resolutions.filter(res => {
           return res.phone && res.phone.toString().trim() === customerPhone;
         });
         
-        console.log('Found resolution:', resolution);
+        console.log('Matching resolutions:', matchingResolutions);
         
         const resolutionSection = document.getElementById('resolutionSection');
         const resolutionContent = document.getElementById('resolutionContent');
         
-        if (resolution) {
-          // Show resolution section and populate data with correct field names
+        if (matchingResolutions.length > 0) {
           resolutionSection.style.display = 'block';
-          resolutionContent.innerHTML = `
-            <div class="resolution-grid">
-              <div class="resolution-field">
-                <span class="resolution-label">Resolution Date:</span>
-                <span class="resolution-value">${resolution.date || 'Not specified'}</span>
+          
+          if (matchingResolutions.length === 1) {
+            // Single resolution
+            const resolution = matchingResolutions[0];
+            resolutionContent.innerHTML = `
+              <div class="resolution-grid">
+                <div class="resolution-field">
+                  <span class="resolution-label">Resolution Date:</span>
+                  <span class="resolution-value">${resolution.date || 'Not specified'}</span>
+                </div>
+                <div class="resolution-field">
+                  <span class="resolution-label">Restaurant:</span>
+                  <span class="resolution-value">${resolution.Resturant || 'Not specified'}</span>
+                </div>
+                <div class="resolution-field">
+                  <span class="resolution-label">Status:</span>
+                  <span class="resolution-value" style="color: #28a745; font-weight: 600;">${resolution.Status || 'Resolved'}</span>
+                </div>
+                <div class="resolution-field">
+                  <span class="resolution-label">Resolved By:</span>
+                  <span class="resolution-value">${resolution.Resolvedby || 'Call Center Agent'}</span>
+                </div>
               </div>
-              <div class="resolution-field">
-                <span class="resolution-label">Restaurant:</span>
-                <span class="resolution-value">${resolution.Resturant || 'Not specified'}</span>
+              <div class="resolution-details">
+                <span class="resolution-label">Resolution Details:</span>
+                <div class="resolution-text">${resolution.Resolution || 'No resolution details provided.'}</div>
               </div>
-              <div class="resolution-field">
-                <span class="resolution-label">Status:</span>
-                <span class="resolution-value" style="color: #28a745; font-weight: 600;">${resolution.Status || 'Resolved'}</span>
+            `;
+          } else {
+            // Multiple resolutions
+            resolutionContent.innerHTML = `
+              <div style="margin-bottom: 1rem;">
+                <strong>Found ${matchingResolutions.length} resolutions for this customer:</strong>
               </div>
-              <div class="resolution-field">
-                <span class="resolution-label">Resolved By:</span>
-                <span class="resolution-value">${resolution.Resolvedby || 'Call Center Agent'}</span>
-              </div>
-            </div>
-            <div class="resolution-details">
-              <span class="resolution-label">Resolution Details:</span>
-              <div class="resolution-text">${resolution.Resolution || 'No resolution details provided.'}</div>
-            </div>
-          `;
+              ${matchingResolutions.map((resolution, index) => `
+                <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8fffe; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                  <h4 style="color: var(--primary); margin-bottom: 1rem;">Resolution ${index + 1}</h4>
+                  <div class="resolution-grid">
+                    <div class="resolution-field">
+                      <span class="resolution-label">Resolution Date:</span>
+                      <span class="resolution-value">${resolution.date || 'Not specified'}</span>
+                    </div>
+                    <div class="resolution-field">
+                      <span class="resolution-label">Restaurant:</span>
+                      <span class="resolution-value">${resolution.Resturant || 'Not specified'}</span>
+                    </div>
+                    <div class="resolution-field">
+                      <span class="resolution-label">Status:</span>
+                      <span class="resolution-value" style="color: #28a745; font-weight: 600;">${resolution.Status || 'Resolved'}</span>
+                    </div>
+                    <div class="resolution-field">
+                      <span class="resolution-label">Resolved By:</span>
+                      <span class="resolution-value">${resolution.Resolvedby || 'Call Center Agent'}</span>
+                    </div>
+                  </div>
+                  <div class="resolution-details">
+                    <span class="resolution-label">Resolution Details:</span>
+                    <div class="resolution-text">${resolution.Resolution || 'No resolution details provided.'}</div>
+                  </div>
+                </div>
+              `).join('')}
+            `;
+          }
         } else {
           // Show message if no resolution found
           resolutionSection.style.display = 'block';
