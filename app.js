@@ -97,7 +97,7 @@ function updateKPICards() {
 }
 
 function formatCurrency(amount) {
-  return '¥' + amount.toLocaleString('en-US', {
+  return 'EGP ' + amount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
