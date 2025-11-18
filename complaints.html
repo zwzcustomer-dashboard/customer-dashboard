@@ -6,297 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* ----------  RESET / BASE  ---------- */
-    :root {
-      --primary: #00a79d;
-      --primary-dark: #008c83;
-      --primary-light: #00b8ad;
-      --surface: #ffffff;
-      --background: #f8fffe;
-      --text-primary: #1a3a3a;
-      --text-secondary: #5a7a7a;
-      --text-muted: #8a9e9e;
-      --border: #e0f0ee;
-      --border-light: #f0f8f7;
-      --shadow: 0 1px 3px 0 rgba(0, 167, 157, 0.1), 0 1px 2px 0 rgba(0, 167, 157, 0.06);
-      --shadow-md: 0 4px 6px -1px rgba(0, 167, 157, 0.1), 0 2px 4px -1px rgba(0, 167, 157, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 167, 157, 0.1), 0 4px 6px -2px rgba(0, 167, 157, 0.05);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * { 
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 2rem;
-      background: linear-gradient(135deg, #f0fffd 0%, #f8fffe 100%);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: between;
-      align-items: center;
-      margin-bottom: 2rem;
-    }
-
-    .back-btn {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: var(--transition);
-    }
-
-    .back-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.5rem;
-    }
-
-    /* Customer Info */
-    .customer-info {
-      background: var(--surface);
-      padding: 2rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      margin-bottom: 2rem;
-      border-left: 4px solid var(--primary);
-    }
-
-    /* Complaints Container */
-    .complaints-container {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-    }
-
-    /* Complaint Cards */
-    .complaint-card {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border-light);
-      transition: var(--transition);
-    }
-
-    .complaint-card:hover {
-      background: #f5fffe;
-    }
-
-    .complaint-card:last-child {
-      border-bottom: none;
-    }
-
-    .complaint-header {
-      display: flex;
-      justify-content: between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .complaint-category {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .complaint-date {
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-
-    .complaint-details {
-      margin-bottom: 1rem;
-    }
-
-    .complaint-details h3 {
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-      font-size: 1rem;
-    }
-
-    .complaint-text {
-      color: var(--text-secondary);
-      line-height: 1.5;
-      background: #f8fffe;
-      padding: 1rem;
-      border-radius: var(--radius-sm);
-      border-left: 3px solid var(--primary);
-    }
-
-    /* Order Info */
-    .order-info {
-      background: #f0f8f7;
-      padding: 1rem;
-      border-radius: var(--radius-sm);
-      margin-bottom: 1rem;
-      border: 1px solid var(--border);
-    }
-
-    .order-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-
-    .order-detail {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .order-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .order-value {
-      font-size: 0.9rem;
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    /* Resolution Section */
-    .resolution-section {
-      background: #f8fdf8;
-      padding: 1rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid #d1fae5;
-      margin-top: 1rem;
-    }
-
-    .resolution-section h4 {
-      color: #065f46;
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
-      font-weight: 700;
-    }
-
-    .resolution-text {
-      color: #065f46;
-      line-height: 1.5;
-    }
-
-    /* Status badges */
-    .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-resolved {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .status-pending {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-urgent {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-secondary);
-    }
-
-    /* No Data */
-    .no-data {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-muted);
-      font-style: italic;
-    }
-
-    /* Debug Info */
-    .debug-info {
-      background: #fff3cd;
-      padding: 1rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid #ffeaa7;
-      margin-bottom: 1rem;
-      font-size: 0.8rem;
-      color: #856404;
-    }
-
-    /* Links */
-    a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-    a:hover {
-      color: var(--primary-dark);
-      text-decoration: underline;
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-      }
-      
-      .header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-      }
-      
-      .complaint-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .order-details {
-        grid-template-columns: 1fr;
-      }
-    }
+    /* ... (keep all the same CSS styles) ... */
   </style>
 </head>
 <body>
@@ -320,6 +30,11 @@
     const urlParams = new URLSearchParams(window.location.search);
     const phone = urlParams.get('phone');
 
+    // Function to normalize phone numbers for comparison
+    function normalizePhone(phone) {
+      return phone.toString().trim().replace(/\D/g, ''); // Remove non-digits
+    }
+
     // Function to find matching order for a complaint
     function findMatchingOrder(complaint, orders) {
       const complaintDate = new Date(complaint.date);
@@ -331,15 +46,43 @@
       });
     }
 
-    // Function to find resolution for a complaint
+    // Function to find resolution for a complaint - MORE FLEXIBLE MATCHING
     function findResolution(complaint, resolutions) {
-      // Try to match by phone and date
+      const complaintPhone = normalizePhone(complaint.phone || '');
       const complaintDate = new Date(complaint.date);
       
+      console.log(`Looking for resolution for phone: ${complaintPhone}, date: ${complaintDate.toDateString()}`);
+      
+      // Try different matching strategies
       return resolutions.find(resolution => {
-        const resolutionDate = new Date(resolution.date || resolution.resolution_date || '');
-        return (resolution.phone || '').toString().trim() === phone &&
-               resolutionDate.toDateString() === complaintDate.toDateString();
+        const resolutionPhone = normalizePhone(resolution.phone || '');
+        const resolutionDate = new Date(resolution.date || resolution.resolution_date || resolution.complaint_date || '');
+        
+        console.log(`Checking resolution - phone: ${resolutionPhone}, date: ${resolutionDate.toDateString()}`);
+        
+        // Strategy 1: Exact phone and date match
+        if (resolutionPhone === complaintPhone && resolutionDate.toDateString() === complaintDate.toDateString()) {
+          console.log('✅ Exact match found!');
+          return true;
+        }
+        
+        // Strategy 2: Phone match and date within 7 days
+        if (resolutionPhone === complaintPhone) {
+          const dateDiff = Math.abs(resolutionDate - complaintDate);
+          const daysDiff = dateDiff / (1000 * 60 * 60 * 24);
+          if (daysDiff <= 7) {
+            console.log(`✅ Close date match found (${daysDiff.toFixed(1)} days difference)`);
+            return true;
+          }
+        }
+        
+        // Strategy 3: Just phone match (show all resolutions for this phone)
+        if (resolutionPhone === complaintPhone) {
+          console.log('✅ Phone match found (different date)');
+          return true;
+        }
+        
+        return false;
       });
     }
 
@@ -355,8 +98,10 @@
     function getResolutionText(resolution) {
       if (!resolution) return null;
       
+      console.log('Resolution object fields:', Object.keys(resolution));
+      
       // Try different possible field names for resolution
-      return resolution.resolution || 
+      const resolutionText = resolution.resolution || 
              resolution.resolution_details || 
              resolution.resolutionDetails ||
              resolution.resolution_text ||
@@ -366,7 +111,12 @@
              resolution.actionTaken ||
              resolution.details ||
              resolution.description ||
+             resolution.notes ||
+             resolution.comments ||
              null;
+      
+      console.log('Found resolution text:', resolutionText);
+      return resolutionText;
     }
 
     // Function to get status from complaint or resolution
@@ -391,23 +141,33 @@
         })
       ])
       .then(([dataRows, compRows, resolutionRows = []]) => {
-        console.log('Loaded data:', {
-          orders: dataRows.length,
-          complaints: compRows.length,
-          resolutions: resolutionRows.length
-        });
-
+        console.log('=== DATA LOADED ===');
+        console.log('Orders:', dataRows.length);
+        console.log('Complaints:', compRows.length);
+        console.log('Resolutions:', resolutionRows.length);
+        
+        // Show all resolutions for debugging
+        console.log('All resolution records:', resolutionRows);
+        
         // Filter complaints for this customer
+        const normalizedSearchPhone = normalizePhone(phone);
         const customerComplaints = compRows.filter(complaint => 
-          (complaint.phone || '').toString().trim() === phone
+          normalizePhone(complaint.phone || '') === normalizedSearchPhone
         );
 
-        console.log('Customer complaints:', customerComplaints);
-        console.log('All resolutions:', resolutionRows);
+        // Filter resolutions for this customer
+        const customerResolutions = resolutionRows.filter(resolution => 
+          normalizePhone(resolution.phone || '') === normalizedSearchPhone
+        );
+
+        console.log('=== CUSTOMER DATA ===');
+        console.log('Customer complaints:', customerComplaints.length, customerComplaints);
+        console.log('Customer resolutions:', customerResolutions.length, customerResolutions);
+        console.log('Searching for phone:', normalizedSearchPhone);
 
         // Get customer info from orders
         const customerOrders = dataRows.filter(order => 
-          (order['Account Phones'] || '').toString().trim() === phone
+          normalizePhone(order['Account Phones'] || '') === normalizedSearchPhone
         );
         const customerName = customerOrders[0]?.['Account Name'] || 'Unknown Customer';
         const totalOrders = customerOrders.length;
@@ -428,9 +188,18 @@
               <strong>Total Complaints:</strong> ${customerComplaints.length}
             </div>
             <div>
-              <strong>Resolutions Found:</strong> ${resolutionRows.filter(r => (r.phone || '').toString().trim() === phone).length}
+              <strong>Resolutions Found:</strong> ${customerResolutions.length}
             </div>
           </div>
+          ${customerResolutions.length > 0 ? `
+          <div style="margin-top: 1rem; padding: 1rem; background: #f0f8f7; border-radius: 8px;">
+            <strong>Resolution Data Found:</strong><br>
+            ${customerResolutions.map(r => 
+              `Date: ${new Date(r.date || r.resolution_date || '').toLocaleDateString()}, ` +
+              `Fields: ${Object.keys(r).join(', ')}`
+            ).join('<br>')}
+          </div>
+          ` : ''}
         `;
 
         // Update complaints list
@@ -446,15 +215,13 @@
               const complaintDate = new Date(complaint.date || '');
               const status = getStatus(complaint, matchingResolution);
               const resolutionText = getResolutionText(matchingResolution);
-              const hasResolution = resolutionText && resolutionText !== 'No resolution details available';
+              const hasResolution = resolutionText && resolutionText.trim().length > 0;
               
-              console.log('Processing complaint:', {
-                complaintDate: complaintDate.toDateString(),
-                hasMatchingOrder: !!matchingOrder,
-                hasMatchingResolution: !!matchingResolution,
-                resolutionText: resolutionText,
-                status: status
-              });
+              console.log('=== COMPLAINT PROCESSING ===');
+              console.log('Complaint:', complaint);
+              console.log('Matching Resolution:', matchingResolution);
+              console.log('Has Resolution:', hasResolution);
+              console.log('Resolution Text:', resolutionText);
 
               return `
                 <div class="complaint-card">
@@ -495,9 +262,9 @@
                   <div class="resolution-section">
                     <h4>✅ Resolution</h4>
                     <div class="resolution-text">${resolutionText}</div>
-                    ${matchingResolution && matchingResolution.resolved_date ? `
+                    ${matchingResolution && (matchingResolution.resolved_date || matchingResolution.date) ? `
                     <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #065f46;">
-                      Resolved on: ${new Date(matchingResolution.resolved_date).toLocaleDateString()}
+                      Resolved on: ${new Date(matchingResolution.resolved_date || matchingResolution.date).toLocaleDateString()}
                     </div>
                     ` : ''}
                     ${matchingResolution && matchingResolution.resolved_by ? `
@@ -510,7 +277,9 @@
                   <div class="complaint-details">
                     <h3>Resolution Status:</h3>
                     <div class="complaint-text" style="background: #fef3c7; border-left-color: #f59e0b;">
-                      No resolution found for this complaint. ${matchingResolution ? 'Matching resolution found but no resolution text.' : 'No matching resolution record found.'}
+                      ${matchingResolution ? 
+                        'Resolution record found but no resolution text available.' : 
+                        'No resolution record found for this complaint.'}
                     </div>
                   </div>
                   `}
@@ -525,12 +294,14 @@
                   <!-- Debug information for this complaint -->
                   <div class="debug-info" style="display: none;">
                     <strong>Debug Info:</strong><br>
+                    Complaint Phone: ${complaint.phone}<br>
                     Complaint Date: ${complaintDate.toDateString()}<br>
                     Has Matching Order: ${!!matchingOrder}<br>
                     Has Matching Resolution: ${!!matchingResolution}<br>
                     Resolution Object: ${JSON.stringify(matchingResolution)}<br>
                     Resolution Text: "${resolutionText}"<br>
-                    Status: ${status}
+                    Status: ${status}<br>
+                    All Resolution Fields: ${matchingResolution ? Object.keys(matchingResolution).join(', ') : 'N/A'}
                   </div>
                 </div>
               `;
