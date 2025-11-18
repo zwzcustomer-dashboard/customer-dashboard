@@ -331,6 +331,18 @@
       });
     }
 
+    // Function to find resolution for a complaint
+    function findResolution(complaint, resolutions) {
+      // Try to match by phone and date
+      const complaintDate = new Date(complaint.date);
+      
+      return resolutions.find(resolution => {
+        const resolutionDate = new Date(resolution.date || resolution.resolution_date || '');
+        return (resolution.phone || '').toString().trim() === phone &&
+               resolutionDate.toDateString() === complaintDate.toDateString();
+      });
+    }
+
     // Function to format currency
     function formatCurrency(amount) {
       return 'EGP ' + (amount || 0).toLocaleString('en-US', {
@@ -339,59 +351,59 @@
       });
     }
 
-    // Function to get resolution text from complaint object
-    function getResolution(complaint) {
+    // Function to get resolution text from resolution object
+    function getResolutionText(resolution) {
+      if (!resolution) return null;
+      
       // Try different possible field names for resolution
-      return complaint.resolution || 
-             complaint.resolution_details || 
-             complaint.resolutionDetails ||
-             complaint.resolution_text ||
-             complaint.resolutionText ||
-             complaint.outcome ||
-             complaint.action_taken ||
-             complaint.actionTaken ||
-             'No resolution details available';
+      return resolution.resolution || 
+             resolution.resolution_details || 
+             resolution.resolutionDetails ||
+             resolution.resolution_text ||
+             resolution.resolutionText ||
+             resolution.outcome ||
+             resolution.action_taken ||
+             resolution.actionTaken ||
+             resolution.details ||
+             resolution.description ||
+             null;
     }
 
-    // Function to get status from complaint object
-    function getStatus(complaint) {
-      return complaint.status || 
-             complaint.complaint_status ||
-             complaint.complaintStatus ||
-             'pending';
-    }
-
-    // Function to get priority from complaint object
-    function getPriority(complaint) {
-      return complaint.priority || 
-             complaint.urgency ||
-             complaint.severity ||
-             'medium';
+    // Function to get status from complaint or resolution
+    function getStatus(complaint, resolution) {
+      if (resolution) {
+        return resolution.status || 'resolved';
+      }
+      return complaint.status || 'pending';
     }
 
     if (!phone) {
       document.getElementById('customerInfo').innerHTML = '<div class="loading">No customer phone specified</div>';
       document.getElementById('complaintsList').innerHTML = '<div class="loading">No customer phone specified</div>';
     } else {
-      // Load and display complaint data
+      // Load data from ALL three files
       Promise.all([
         fetch('data.json').then(r => r.json()),
-        fetch('complaints.json').then(r => r.json())
+        fetch('complaints.json').then(r => r.json()),
+        fetch('resolution.json').then(r => r.json()).catch(err => {
+          console.log('No resolution.json file found or error loading it:', err);
+          return []; // Return empty array if file doesn't exist
+        })
       ])
-      .then(([dataRows, compRows]) => {
+      .then(([dataRows, compRows, resolutionRows = []]) => {
+        console.log('Loaded data:', {
+          orders: dataRows.length,
+          complaints: compRows.length,
+          resolutions: resolutionRows.length
+        });
+
         // Filter complaints for this customer
         const customerComplaints = compRows.filter(complaint => 
           (complaint.phone || '').toString().trim() === phone
         );
 
-        // Debug: Show what data we're getting
-        console.log('All complaints data:', compRows);
-        console.log('Filtered complaints for phone:', phone, customerComplaints);
-        
-        if (customerComplaints.length > 0) {
-          console.log('First complaint object:', customerComplaints[0]);
-          console.log('Available fields in first complaint:', Object.keys(customerComplaints[0]));
-        }
+        console.log('Customer complaints:', customerComplaints);
+        console.log('All resolutions:', resolutionRows);
 
         // Get customer info from orders
         const customerOrders = dataRows.filter(order => 
@@ -415,6 +427,9 @@
             <div>
               <strong>Total Complaints:</strong> ${customerComplaints.length}
             </div>
+            <div>
+              <strong>Resolutions Found:</strong> ${resolutionRows.filter(r => (r.phone || '').toString().trim() === phone).length}
+            </div>
           </div>
         `;
 
@@ -427,19 +442,27 @@
             .sort((a, b) => new Date(b.date || '') - new Date(a.date || ''))
             .map(complaint => {
               const matchingOrder = findMatchingOrder(complaint, customerOrders);
+              const matchingResolution = findResolution(complaint, resolutionRows);
               const complaintDate = new Date(complaint.date || '');
-              const status = getStatus(complaint);
-              const priority = getPriority(complaint);
-              const resolution = getResolution(complaint);
-              const hasResolution = resolution && resolution !== 'No resolution details available';
+              const status = getStatus(complaint, matchingResolution);
+              const resolutionText = getResolutionText(matchingResolution);
+              const hasResolution = resolutionText && resolutionText !== 'No resolution details available';
               
+              console.log('Processing complaint:', {
+                complaintDate: complaintDate.toDateString(),
+                hasMatchingOrder: !!matchingOrder,
+                hasMatchingResolution: !!matchingResolution,
+                resolutionText: resolutionText,
+                status: status
+              });
+
               return `
                 <div class="complaint-card">
                   <div class="complaint-header">
                     <span class="complaint-category">${complaint.category || 'Uncategorized'}</span>
                     <span class="complaint-date">${complaintDate.toLocaleDateString()}</span>
-                    <span class="status-badge ${status === 'resolved' ? 'status-resolved' : priority === 'high' ? 'status-urgent' : 'status-pending'}">
-                      ${status === 'resolved' ? 'Resolved' : priority === 'high' ? 'Urgent' : 'Pending'}
+                    <span class="status-badge ${status === 'resolved' ? 'status-resolved' : 'status-pending'}">
+                      ${status === 'resolved' ? 'Resolved' : 'Pending'}
                     </span>
                   </div>
                   
@@ -471,14 +494,26 @@
                   ${hasResolution ? `
                   <div class="resolution-section">
                     <h4>✅ Resolution</h4>
-                    <div class="resolution-text">${resolution}</div>
-                    ${complaint.resolved_date ? `
+                    <div class="resolution-text">${resolutionText}</div>
+                    ${matchingResolution && matchingResolution.resolved_date ? `
                     <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #065f46;">
-                      Resolved on: ${new Date(complaint.resolved_date).toLocaleDateString()}
+                      Resolved on: ${new Date(matchingResolution.resolved_date).toLocaleDateString()}
+                    </div>
+                    ` : ''}
+                    ${matchingResolution && matchingResolution.resolved_by ? `
+                    <div style="margin-top: 0.25rem; font-size: 0.8rem; color: #065f46;">
+                      Resolved by: ${matchingResolution.resolved_by}
                     </div>
                     ` : ''}
                   </div>
-                  ` : ''}
+                  ` : `
+                  <div class="complaint-details">
+                    <h3>Resolution Status:</h3>
+                    <div class="complaint-text" style="background: #fef3c7; border-left-color: #f59e0b;">
+                      No resolution found for this complaint. ${matchingResolution ? 'Matching resolution found but no resolution text.' : 'No matching resolution record found.'}
+                    </div>
+                  </div>
+                  `}
                   
                   ${complaint.follow_up || complaint.follow_up_actions ? `
                   <div class="complaint-details">
@@ -489,12 +524,13 @@
 
                   <!-- Debug information for this complaint -->
                   <div class="debug-info" style="display: none;">
-                    <strong>Debug Info for this complaint:</strong><br>
-                    Available fields: ${Object.keys(complaint).join(', ')}<br>
-                    Resolution field: ${complaint.resolution ? 'EXISTS' : 'MISSING'}<br>
-                    Resolution value: "${complaint.resolution}"<br>
-                    Status: ${status}<br>
-                    Priority: ${priority}
+                    <strong>Debug Info:</strong><br>
+                    Complaint Date: ${complaintDate.toDateString()}<br>
+                    Has Matching Order: ${!!matchingOrder}<br>
+                    Has Matching Resolution: ${!!matchingResolution}<br>
+                    Resolution Object: ${JSON.stringify(matchingResolution)}<br>
+                    Resolution Text: "${resolutionText}"<br>
+                    Status: ${status}
                   </div>
                 </div>
               `;
