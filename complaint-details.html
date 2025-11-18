@@ -80,6 +80,26 @@
       margin-bottom: 0.5rem;
     }
 
+    /* Customer Info */
+    .customer-info {
+      background: var(--surface);
+      padding: 1.5rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--primary);
+    }
+
+    .customer-info h2 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .customer-info p {
+      color: var(--text-secondary);
+      margin: 0.25rem 0;
+    }
+
     /* Section Headers */
     .section-header {
       color: var(--primary);
@@ -164,12 +184,21 @@
       color: #92400e;
     }
 
-    /* Resolution Section */
-    .resolution-text {
+    .status-open {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Resolution Details */
+    .resolution-details {
       background: #f8fffe;
-      padding: 1rem;
+      padding: 1.5rem;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    .resolution-text {
       line-height: 1.6;
       white-space: pre-wrap;
       direction: rtl;
@@ -177,7 +206,7 @@
       font-family: 'Inter', sans-serif;
     }
 
-    .no-resolution {
+    .no-data {
       text-align: center;
       color: var(--text-muted);
       font-style: italic;
@@ -209,6 +238,11 @@
       .table-container {
         overflow-x: auto;
       }
+      
+      th, td {
+        padding: 1rem 0.75rem;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
@@ -221,6 +255,12 @@
   <div id="loading" class="loading">Loading complaint details...</div>
 
   <div id="content" style="display: none;">
+    <!-- Customer Information -->
+    <div class="customer-info">
+      <h2 id="customerName">Loading...</h2>
+      <p id="customerPhone">Phone: Loading...</p>
+    </div>
+
     <!-- Table 1: Order with Complaint -->
     <h2 class="section-header">1. Order with Complaint</h2>
     <div class="table-container">
@@ -248,15 +288,13 @@
         <thead>
           <tr>
             <th>Complaint Date</th>
-            <th>Customer Name</th>
-            <th>Phone</th>
-            <th>Complaint Details</th>
+            <th>Details</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td colspan="5" class="loading">Loading complaint details...</td>
+            <td colspan="3" class="loading">Loading complaint details...</td>
           </tr>
         </tbody>
       </table>
@@ -280,8 +318,9 @@
           </tr>
         </tbody>
       </table>
-      <div id="resolutionDetails" style="padding: 1.5rem;">
-        <!-- Resolution details will be shown here -->
+      <div id="resolutionDetails" class="resolution-details">
+        <strong>Resolution Details:</strong>
+        <div id="resolutionText" class="resolution-text">Loading resolution details...</div>
       </div>
     </div>
   </div>
@@ -305,67 +344,69 @@
           fetch('resolutions.json').then(r => r.json())
         ]);
 
-        // Find customer complaints
-        const customerComplaints = compRows.filter(complaint => 
-          (complaint.phone || '').toString().trim() === phone
-        );
-
-        if (customerComplaints.length === 0) {
-          document.getElementById('loading').innerHTML = 'No complaints found for this customer';
-          return;
-        }
-
-        // Use the first complaint (you can modify this to handle multiple complaints)
-        const complaint = customerComplaints[0];
-
-        // Find customer orders
+        // Find customer data
         const customerOrders = dataRows.filter(order => 
           (order['Account Phones'] || '').toString().trim() === phone
         );
 
-        // Find resolution
-        const resolution = resolutions.find(res => 
-          res.phone && res.phone.toString().trim() === phone
+        const customerComplaints = compRows.filter(complaint => 
+          (complaint.phone || '').toString().trim() === phone
+        );
+
+        const customerResolutions = resolutions.filter(resolution => 
+          resolution.phone && resolution.phone.toString().trim() === phone
         );
 
         // Show content
         document.getElementById('loading').style.display = 'none';
         document.getElementById('content').style.display = 'block';
 
+        // Update customer info
+        const customerName = customerOrders[0]?.['Account Name'] || customerComplaints[0]?.name || 'Unknown Customer';
+        document.getElementById('customerName').textContent = customerName;
+        document.getElementById('customerPhone').textContent = `Phone: ${phone}`;
+
         // Populate Table 1: Order with Complaint
         const orderTbody = document.querySelector('#orderTable tbody');
         if (customerOrders.length > 0) {
-          // Use the most recent order or find order by date matching complaint
-          const order = customerOrders[0]; // Using first order, you can add date matching logic
+          // Show the most recent order
+          const recentOrder = customerOrders.sort((a, b) => 
+            new Date(b['Created'] || '') - new Date(a['Created'] || '')
+          )[0];
+          
           orderTbody.innerHTML = `
             <tr>
-              <td>${new Date(order['Created'] || '').toLocaleDateString()}</td>
-              <td>${order['Resturant'] || order['Restaurant'] || 'N/A'}</td>
-              <td>EGP ${(parseFloat(order['Total Price']) || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td>${new Date(recentOrder['Created'] || '').toLocaleDateString()}</td>
+              <td>${recentOrder['Resturant'] || recentOrder['Restaurant'] || 'N/A'}</td>
+              <td>EGP ${(parseFloat(recentOrder['Total Price']) || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
               <td><span class="status-badge status-completed">Completed</span></td>
             </tr>
           `;
         } else {
-          orderTbody.innerHTML = '<tr><td colspan="4">No orders found</td></tr>';
+          orderTbody.innerHTML = '<tr><td colspan="4"><div class="no-data">No orders found</div></td></tr>';
         }
 
         // Populate Table 2: Complaint Details
         const complaintTbody = document.querySelector('#complaintTable tbody');
-        complaintTbody.innerHTML = `
-          <tr>
-            <td>${complaint.date || 'N/A'}</td>
-            <td>${complaint.name || 'N/A'}</td>
-            <td>${complaint.phone || 'N/A'}</td>
-            <td>${complaint.details || 'No details provided'}</td>
-            <td><span class="status-badge ${complaint.status === 'Resolved' ? 'status-resolved' : 'status-pending'}">${complaint.status || 'Open'}</span></td>
-          </tr>
-        `;
+        if (customerComplaints.length > 0) {
+          const complaint = customerComplaints[0]; // Show first complaint
+          complaintTbody.innerHTML = `
+            <tr>
+              <td>${complaint.date || 'N/A'}</td>
+              <td>${complaint.details || 'No details provided'}</td>
+              <td><span class="status-badge ${complaint.status === 'Resolved' ? 'status-resolved' : complaint.status === 'Pending' ? 'status-pending' : 'status-open'}">${complaint.status || 'Open'}</span></td>
+            </tr>
+          `;
+        } else {
+          complaintTbody.innerHTML = '<tr><td colspan="3"><div class="no-data">No complaints found</div></td></tr>';
+        }
 
         // Populate Table 3: Resolution
         const resolutionTbody = document.querySelector('#resolutionTable tbody');
-        const resolutionDetails = document.getElementById('resolutionDetails');
-
-        if (resolution) {
+        const resolutionText = document.getElementById('resolutionText');
+        
+        if (customerResolutions.length > 0) {
+          const resolution = customerResolutions[0]; // Show first resolution
           resolutionTbody.innerHTML = `
             <tr>
               <td>${resolution.date || 'N/A'}</td>
@@ -374,13 +415,10 @@
               <td><span class="status-badge status-resolved">${resolution.Status || 'Resolved'}</span></td>
             </tr>
           `;
-          resolutionDetails.innerHTML = `
-            <h3 style="color: var(--text-secondary); margin-bottom: 0.5rem;">Resolution Details:</h3>
-            <div class="resolution-text">${resolution.Resolution || 'No resolution details provided.'}</div>
-          `;
+          resolutionText.textContent = resolution.Resolution || 'No resolution details provided.';
         } else {
-          resolutionTbody.innerHTML = '<tr><td colspan="4">No resolution found</td></tr>';
-          resolutionDetails.innerHTML = '<div class="no-resolution">No resolution found for this complaint</div>';
+          resolutionTbody.innerHTML = '<tr><td colspan="4"><div class="no-data">No resolution found</div></td></tr>';
+          resolutionText.textContent = 'No resolution details available.';
         }
 
       } catch (error) {
