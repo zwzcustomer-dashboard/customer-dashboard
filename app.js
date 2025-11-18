@@ -193,7 +193,7 @@ function drawTable(data) {
     
     tr.className = rowClass;
     tr.innerHTML = `
-      <td><a href="order-history.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
+      <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
       <td>${r.name}</td>
       <td>${r.orders}</td>
       <td>${formatCurrency(r.totalSpent)}</td>
