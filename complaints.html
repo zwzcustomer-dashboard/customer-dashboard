@@ -8,19 +8,19 @@
   <style>
     /* ----------  RESET / BASE  ---------- */
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #8b5cf6;
+      --primary: #00a79d;
+      --primary-dark: #008c83;
+      --primary-light: #00b8ad;
       --surface: #ffffff;
-      --background: #f8fafc;
-      --text-primary: #1e293b;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --border: #e2e8f0;
-      --border-light: #f1f5f9;
-      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --background: #f8fffe;
+      --text-primary: #1a3a3a;
+      --text-secondary: #5a7a7a;
+      --text-muted: #8a9e9e;
+      --border: #e0f0ee;
+      --border-light: #f0f8f7;
+      --shadow: 0 1px 3px 0 rgba(0, 167, 157, 0.1), 0 1px 2px 0 rgba(0, 167, 157, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 167, 157, 0.1), 0 2px 4px -1px rgba(0, 167, 157, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 167, 157, 0.1), 0 4px 6px -2px rgba(0, 167, 157, 0.05);
       --radius: 12px;
       --radius-sm: 8px;
       --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -36,40 +36,21 @@
       font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
       padding: 2rem;
-      background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+      background: linear-gradient(135deg, #f0fffd 0%, #f8fffe 100%);
       color: var(--text-primary);
       line-height: 1.6;
       min-height: 100vh;
     }
 
-    /* ----------  HEADER  ---------- */
-    .header-container {
+    /* Header */
+    .header {
       display: flex;
-      justify-content: space-between;
+      justify-content: between;
       align-items: center;
       margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
     }
 
-    .header-content h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.025em;
-    }
-
-    .header-content .subtitle {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-      font-weight: 400;
-    }
-
-    .back-button {
+    .back-btn {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: white;
       border: none;
@@ -77,131 +58,103 @@
       border-radius: var(--radius-sm);
       cursor: pointer;
       font-weight: 600;
-      font-size: 0.95rem;
-      transition: var(--transition);
+      text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      box-shadow: var(--shadow);
-      text-decoration: none;
+      transition: var(--transition);
     }
 
-    .back-button:hover {
+    .back-btn:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-lg);
     }
 
-    /* ----------  SUMMARY CARD  ---------- */
-    .summary-card {
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Customer Info */
+    .customer-info {
       background: var(--surface);
-      padding: 1.5rem;
+      padding: 2rem;
       border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-lg);
       margin-bottom: 2rem;
       border-left: 4px solid var(--primary);
     }
 
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .summary-item {
-      text-align: center;
-      padding: 1rem;
-      background: var(--background);
-      border-radius: var(--radius-sm);
-    }
-
-    .summary-value {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 0.25rem;
-    }
-
-    .summary-label {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* ----------  TABLES  ---------- */
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin: 2rem 0 1rem 0;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--primary);
-      display: inline-block;
-    }
-
-    .table-container {
+    /* Complaints Container */
+    .complaints-container {
       background: var(--surface);
       border-radius: var(--radius);
       box-shadow: var(--shadow-lg);
       overflow: hidden;
-      border: 1px solid var(--border-light);
-      margin-bottom: 2rem;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--surface);
-      font-size: 0.95rem;
+    /* Complaint Cards */
+    .complaint-card {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      transition: var(--transition);
     }
 
-    thead {
+    .complaint-card:hover {
+      background: #f5fffe;
+    }
+
+    .complaint-card:last-child {
+      border-bottom: none;
+    }
+
+    .complaint-header {
+      display: flex;
+      justify-content: between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .complaint-category {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    }
-
-    th {
-      padding: 1.25rem 1rem;
-      text-align: left;
       color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
       font-weight: 600;
-      font-size: 0.9rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      position: relative;
     }
 
-    th:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 60%;
-      width: 1px;
-      background: rgba(255, 255, 255, 0.2);
+    .complaint-date {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
     }
 
-    tbody tr {
-      transition: var(--transition);
-      border-bottom: 1px solid var(--border-light);
+    .complaint-details {
+      margin-bottom: 1rem;
     }
 
-    tbody tr:hover {
-      background: #f8faff;
-      transform: scale(1.002);
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
-    }
-
-    tbody tr:nth-child(even) {
-      background: #fafbff;
-    }
-
-    td {
-      padding: 1.25rem 1rem;
+    .complaint-details h3 {
       color: var(--text-primary);
-      font-weight: 500;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .complaint-text {
+      color: var(--text-secondary);
+      line-height: 1.5;
+      background: #f8fffe;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--primary);
     }
 
     /* Status badges */
@@ -215,8 +168,8 @@
     }
 
     .status-resolved {
-      background: #dcfce7;
-      color: #166534;
+      background: #d1fae5;
+      color: #065f46;
     }
 
     .status-pending {
@@ -224,368 +177,134 @@
       color: #92400e;
     }
 
-    /* Row styling based on status */
-    .resolved-row {
-      background: #f0fdf4;
-      border-left: 3px solid #22c55e;
+    .status-urgent {
+      background: #fee2e2;
+      color: #991b1b;
     }
 
-    .pending-row {
-      background: #fffbeb;
-      border-left: 3px solid #f59e0b;
-    }
-
-    .order-row {
-      background: #eff6ff;
-      border-left: 3px solid #3b82f6;
-    }
-
-    /* ----------  ERROR STATES  ---------- */
-    .error-container {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: var(--radius);
-      padding: 2rem;
-      text-align: center;
-      margin: 2rem 0;
-    }
-
-    .error-title {
-      color: #dc2626;
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-
-    .error-message {
-      color: #7f1d1d;
-      font-size: 1rem;
-    }
-
-    /* ----------  LOADING STATE  ---------- */
+    /* Loading */
     .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(99, 102, 241, 0.3);
-      border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    /* Links */
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
     }
 
-    /* ----------  MOBILE RESPONSIVE  ---------- */
+    a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    /* Mobile Responsive */
     @media (max-width: 768px) {
       body {
         padding: 1rem;
       }
       
-      .header-container {
+      .header {
         flex-direction: column;
         gap: 1rem;
         align-items: flex-start;
       }
       
-      .header-content h1 {
-        font-size: 1.75rem;
-      }
-      
-      .table-container {
-        overflow-x: auto;
-      }
-      
-      th, td {
-        padding: 1rem 0.75rem;
-        font-size: 0.9rem;
-      }
-      
-      .summary-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-      }
-      
-      .summary-value {
-        font-size: 1.25rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .section-title {
-        font-size: 1.1rem;
-      }
-      
-      .summary-item {
-        padding: 0.75rem;
+      .complaint-header {
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
 </head>
 <body>
-  <div class="header-container">
-    <div class="header-content">
-      <h1 id="title">Complaint Details</h1>
-      <div class="subtitle" id="summary">Loading complaint data...</div>
-    </div>
-    <a href="index.html" class="back-button">← Back to Dashboard</a>
+  <div class="header">
+    <a href="index.html" class="back-btn">← Back to Dashboard</a>
+    <h1>Complaint Details</h1>
   </div>
 
-  <div id="content">
-    <!-- Content will be dynamically loaded here -->
+  <div id="customerInfo" class="customer-info">
+    <div class="loading">Loading customer information...</div>
+  </div>
+
+  <div class="complaints-container" id="complaintsList">
+    <div class="loading">Loading complaints...</div>
   </div>
 
   <script>
-    // Get phone number from URL parameter
-    const urlParams = new URLSearchParams(location.search);
-    const wanted = urlParams.get('phone')?.trim();
+    // Get phone number from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const phone = urlParams.get('phone');
 
-    if (!wanted) {
-      document.getElementById('content').innerHTML = `
-        <div class="error-container">
-          <h2 class="error-title">No phone number supplied</h2>
-          <p class="error-message">Please add ?phone=YOUR_PHONE_NUMBER to the URL</p>
-        </div>
-      `;
-      throw new Error('No phone supplied');
-    }
+    if (!phone) {
+      document.getElementById('customerInfo').innerHTML = '<div class="loading">No customer phone specified</div>';
+      document.getElementById('complaintsList').innerHTML = '<div class="loading">No customer phone specified</div>';
+    } else {
+      // Load and display complaint data
+      Promise.all([
+        fetch('data.json').then(r => r.json()),
+        fetch('complaints.json').then(r => r.json())
+      ])
+      .then(([dataRows, compRows]) => {
+        // Filter complaints for this customer
+        const customerComplaints = compRows.filter(complaint => 
+          (complaint.phone || '').toString().trim() === phone
+        );
 
-    // Display the phone number we're searching for
-    document.getElementById('title').textContent = `Complaints for ${wanted}`;
+        // Get customer info from orders
+        const customerOrders = dataRows.filter(order => 
+          (order['Account Phones'] || '').toString().trim() === phone
+        );
+        const customerName = customerOrders[0]?.['Account Name'] || 'Unknown Customer';
+        const totalOrders = customerOrders.length;
 
-    // Show loading state
-    document.getElementById('summary').innerHTML = `<span class="loading"></span> Loading complaint data...`;
+        // Update customer info
+        document.getElementById('customerInfo').innerHTML = `
+          <h2>${customerName}</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Phone: ${phone}</p>
+          <p style="color: var(--text-secondary);">Total Orders: ${totalOrders}</p>
+        `;
 
-    // Load all JSON files
-    Promise.all([
-      fetch('complaints.json').then(r => {
-        if (!r.ok) throw new Error(`Failed to load complaints.json: ${r.status}`);
-        return r.json();
-      }),
-      fetch('data.json').then(r => {
-        if (!r.ok) throw new Error(`Failed to load data.json: ${r.status}`);
-        return r.json();
-      }),
-      fetch('resolutions.json').then(r => {
-        if (!r.ok) throw new Error(`Failed to load resolutions.json: ${r.status}`);
-        return r.json();
+        // Update complaints list
+        const complaintsList = document.getElementById('complaintsList');
+        if (customerComplaints.length === 0) {
+          complaintsList.innerHTML = '<div class="complaint-card"><div class="complaint-text">No complaints found for this customer</div></div>';
+        } else {
+          complaintsList.innerHTML = customerComplaints
+            .sort((a, b) => new Date(b.date || '') - new Date(a.date || ''))
+            .map(complaint => `
+              <div class="complaint-card">
+                <div class="complaint-header">
+                  <span class="complaint-category">${complaint.category || 'Uncategorized'}</span>
+                  <span class="complaint-date">${new Date(complaint.date || '').toLocaleDateString()}</span>
+                  <span class="status-badge ${complaint.status === 'resolved' ? 'status-resolved' : complaint.priority === 'high' ? 'status-urgent' : 'status-pending'}">
+                    ${complaint.status === 'resolved' ? 'Resolved' : complaint.priority === 'high' ? 'Urgent' : 'Pending'}
+                  </span>
+                </div>
+                <div class="complaint-details">
+                  <h3>Complaint Details:</h3>
+                  <div class="complaint-text">${complaint.details || 'No details provided'}</div>
+                </div>
+                ${complaint.resolution ? `
+                <div class="complaint-details">
+                  <h3>Resolution:</h3>
+                  <div class="complaint-text">${complaint.resolution}</div>
+                </div>
+                ` : ''}
+              </div>
+            `).join('');
+        }
       })
-    ]).then(([compRows, orderRows, resRows]) => {
-      // Normalize data
-      const complaints = compRows.map(c => ({
-        ...c,
-        phone: (c.phone || c.Phone || '').toString().trim(),
-        date: c.date || c.Date || '',
-        category: c.category || c.Category || '',
-        details: c.details || c.Details || ''
-      }));
-
-      const orders = orderRows.map(o => ({
-        ...o,
-        phone: (o.phone || o.Phone || o['Account Phones'] || '').toString().trim(),
-        restaurant: o.restaurant || o.Restaurant || o.Resturant || '',
-        date: o.date || o.Date || o.Created || o.OrderDate || '',
-        payment: o.payment || o.Payment || o['Payment Method'] || '',
-        amount: o.amount || o.Amount || o['Total Price'] || 0
-      }));
-
-      const resolutions = resRows.map(r => ({
-        ...r,
-        phone: (r.phone || r.Phone || '').toString().trim(),
-        date: r.date || r.Date || '',
-        resolvedBy: r.resolvedBy || r['Resolved By'] || r.Resolvedby || '',
-        resolution: r.resolution || r.Resolution || r.action || r.Action || r['Action Taken'] || '',
-        status: r.status || r.Status || ''
-      }));
-
-      // Filter complaints for the wanted phone number
-      const filteredComplaints = complaints.filter(c => c.phone === wanted);
-
-      if (!filteredComplaints.length) {
-        document.getElementById('content').innerHTML = `
-          <div class="error-container">
-            <h2 class="error-title">No complaints found</h2>
-            <p class="error-message">No complaints found for phone number ${wanted}</p>
-          </div>
-        `;
-        return;
-      }
-
-      // Update summary
-      document.getElementById('summary').textContent = `Total complaints: ${filteredComplaints.length}`;
-
-      // Build the content
-      let contentHTML = '';
-
-      /* ---- SUMMARY CARD ---- */
-      const resolvedCount = filteredComplaints.filter(complaint => {
-        const complaintDate = new Date(complaint.date);
-        const complaintDateStr = isNaN(complaintDate) ? '' : complaintDate.toDateString();
-        const resolution = resolutions.find(r => {
-          if (r.phone !== wanted) return false;
-          const resolutionDate = new Date(r.date);
-          if (isNaN(resolutionDate)) return false;
-          return resolutionDate.toDateString() === complaintDateStr;
-        });
-        return resolution && resolution.status === 'Resolved';
-      }).length;
-
-      const pendingCount = filteredComplaints.length - resolvedCount;
-
-      contentHTML += `
-        <div class="summary-card">
-          <h3>Complaint Summary</h3>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <div class="summary-value">${filteredComplaints.length}</div>
-              <div class="summary-label">Total Complaints</div>
-            </div>
-            <div class="summary-item">
-              <div class="summary-value">${resolvedCount}</div>
-              <div class="summary-label">Resolved</div>
-            </div>
-            <div class="summary-item">
-              <div class="summary-value">${pendingCount}</div>
-              <div class="summary-label">Pending</div>
-            </div>
-            <div class="summary-item">
-              <div class="summary-value">${Math.round((resolvedCount / filteredComplaints.length) * 100)}%</div>
-              <div class="summary-label">Resolution Rate</div>
-            </div>
-          </div>
-        </div>
-      `;
-
-      /* ---- ORDERS ON COMPLAINT DATE(S) ---- */
-      const complaintDates = [...new Set(filteredComplaints.map(c => {
-        const date = new Date(c.date);
-        return isNaN(date) ? null : date.toDateString();
-      }).filter(Boolean))];
-
-      const matchedOrders = orders.filter(o => {
-        if (o.phone !== wanted) return false;
-        
-        const orderDate = new Date(o.date);
-        if (isNaN(orderDate)) return false;
-        
-        return complaintDates.includes(orderDate.toDateString());
+      .catch(err => {
+        console.error('Error loading data:', err);
+        document.getElementById('customerInfo').innerHTML = '<div class="loading">Error loading customer information</div>';
+        document.getElementById('complaintsList').innerHTML = '<div class="loading">Error loading complaints</div>';
       });
-
-      contentHTML += `<h3 class="section-title">Order(s) on Complaint Date(s)</h3>`;
-      contentHTML += `<div class="table-container">`;
-      contentHTML += `<table id="orderTable">`;
-      contentHTML += `<thead><tr><th>Date</th><th>Restaurant</th><th>Payment</th><th>Amount</th></tr></thead>`;
-      contentHTML += `<tbody>`;
-      
-      if (matchedOrders.length) {
-        matchedOrders.sort((a, b) => new Date(a.date) - new Date(b.date));
-        matchedOrders.forEach(order => {
-          const orderDate = new Date(order.date);
-          const dateString = isNaN(orderDate) ? 'Invalid Date' : orderDate.toLocaleDateString();
-          const amount = parseFloat(order.amount) || 0;
-          
-          contentHTML += `
-            <tr class="order-row">
-              <td>${dateString}</td>
-              <td>${order.restaurant || 'N/A'}</td>
-              <td>${order.payment || 'N/A'}</td>
-              <td>EGP ${amount.toFixed(2)}</td>
-            </tr>
-          `;
-        });
-      } else {
-        contentHTML += `<tr><td colspan="4" style="text-align: center; padding: 2rem;">No orders found on complaint date(s)</td></tr>`;
-      }
-      
-      contentHTML += `</tbody></table></div>`;
-
-      /* ---- COMPLAINTS TABLE ---- */
-      contentHTML += `<h3 class="section-title">Complaints</h3>`;
-      contentHTML += `<div class="table-container">`;
-      contentHTML += `<table id="complaintTable">`;
-      contentHTML += `<thead><tr><th>Date</th><th>Category</th><th>Complaint Details</th><th>Status</th></tr></thead>`;
-      contentHTML += `<tbody>`;
-      
-      filteredComplaints.sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      filteredComplaints.forEach(complaint => {
-        const complaintDate = new Date(complaint.date);
-        const complaintDateStr = isNaN(complaintDate) ? '' : complaintDate.toDateString();
-        
-        // Find matching resolution to determine status
-        const resolution = resolutions.find(r => {
-          if (r.phone !== wanted) return false;
-          
-          const resolutionDate = new Date(r.date);
-          if (isNaN(resolutionDate)) return false;
-          
-          return resolutionDate.toDateString() === complaintDateStr;
-        }) || {};
-
-        const displayDate = isNaN(complaintDate) ? 'Invalid Date' : complaintDate.toLocaleDateString();
-        const statusClass = resolution.status === 'Resolved' ? 'status-resolved' : 'status-pending';
-        const statusText = resolution.status || 'Pending';
-        const rowClass = resolution.status === 'Resolved' ? 'resolved-row' : 'pending-row';
-        
-        contentHTML += `
-          <tr class="${rowClass}">
-            <td>${displayDate}</td>
-            <td>${complaint.category || 'N/A'}</td>
-            <td>${complaint.details || 'N/A'}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          </tr>
-        `;
-      });
-      
-      contentHTML += `</tbody></table></div>`;
-
-      /* ---- RESOLUTIONS TABLE ---- */
-      contentHTML += `<h3 class="section-title">Resolutions</h3>`;
-      contentHTML += `<div class="table-container">`;
-      contentHTML += `<table id="resolutionTable">`;
-      contentHTML += `<thead><tr><th>Date</th><th>Resolved By</th><th>Resolution Details</th><th>Status</th></tr></thead>`;
-      contentHTML += `<tbody>`;
-      
-      // Filter resolutions for this phone number
-      const filteredResolutions = resolutions.filter(r => r.phone === wanted);
-      
-      if (filteredResolutions.length) {
-        filteredResolutions.sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        filteredResolutions.forEach(resolution => {
-          const resolutionDate = new Date(resolution.date);
-          const displayDate = isNaN(resolutionDate) ? 'Invalid Date' : resolutionDate.toLocaleDateString();
-          const statusClass = resolution.status === 'Resolved' ? 'status-resolved' : 'status-pending';
-          const rowClass = resolution.status === 'Resolved' ? 'resolved-row' : 'pending-row';
-          
-          contentHTML += `
-            <tr class="${rowClass}">
-              <td>${displayDate}</td>
-              <td>${resolution.resolvedBy || '—'}</td>
-              <td>${resolution.resolution || '—'}</td>
-              <td><span class="status-badge ${statusClass}">${resolution.status || 'Pending'}</span></td>
-            </tr>
-          `;
-        });
-      } else {
-        contentHTML += `<tr><td colspan="4" style="text-align: center; padding: 2rem;">No resolutions found</td></tr>`;
-      }
-      
-      contentHTML += `</tbody></table></div>`;
-
-      // Inject the content
-      document.getElementById('content').innerHTML = contentHTML;
-
-    }).catch(error => {
-      console.error('Error:', error);
-      document.getElementById('content').innerHTML = `
-        <div class="error-container">
-          <h2 class="error-title">Error loading data</h2>
-          <p class="error-message">Check browser console for details.</p>
-        </div>
-      `;
-    });
+    }
   </script>
 </body>
 </html>
