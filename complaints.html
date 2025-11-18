@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Complaint Details</title>
+  <title>Customer Complaints</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -45,7 +45,7 @@
     /* Header */
     .header {
       display: flex;
-      justify-content: between;
+      justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
     }
@@ -80,38 +80,56 @@
       margin-bottom: 0.5rem;
     }
 
-    /* Customer Info */
-    .customer-info {
+    /* Filters */
+    .filters {
       background: var(--surface);
-      padding: 2rem;
+      padding: 1.5rem;
       border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow);
       margin-bottom: 2rem;
-      border-left: 4px solid var(--primary);
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
-    /* Section Styling */
-    .section {
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 200px;
+      flex: 1;
+    }
+
+    .filter-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .filter-input {
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      transition: var(--transition);
+      background: var(--surface);
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 167, 157, 0.1);
+    }
+
+    /* Table */
+    .table-container {
       background: var(--surface);
       border-radius: var(--radius);
       box-shadow: var(--shadow-lg);
-      margin-bottom: 2rem;
       overflow: hidden;
+      margin-bottom: 2rem;
     }
 
-    .section-header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 1.5rem 2rem;
-      font-size: 1.2rem;
-      font-weight: 700;
-    }
-
-    .section-content {
-      padding: 0;
-    }
-
-    /* Tables */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -120,18 +138,17 @@
     }
 
     thead {
-      background: #f8fffe;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     }
 
     th {
       padding: 1.25rem 1rem;
       text-align: left;
-      color: var(--text-primary);
+      color: white;
       font-weight: 600;
       font-size: 0.9rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      border-bottom: 2px solid var(--border);
     }
 
     tbody tr {
@@ -173,9 +190,40 @@
       color: #92400e;
     }
 
-    .status-urgent {
-      background: #fee2e2;
-      color: #991b1b;
+    .status-open {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    /* Links */
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .view-details-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: var(--transition);
+    }
+
+    .view-details-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
     }
 
     /* Loading */
@@ -185,12 +233,21 @@
       color: var(--text-secondary);
     }
 
-    /* No Data */
-    .no-data {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-muted);
-      font-style: italic;
+    /* Stats */
+    .stats {
+      background: var(--surface);
+      padding: 1.5rem 2rem;
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary);
+    }
+
+    #stats {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
     }
 
     /* Mobile Responsive */
@@ -205,8 +262,21 @@
         align-items: flex-start;
       }
       
+      .filters {
+        flex-direction: column;
+      }
+      
+      .filter-group {
+        min-width: 100%;
+      }
+      
       .table-container {
         overflow-x: auto;
+      }
+      
+      th, td {
+        padding: 1rem 0.75rem;
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -214,200 +284,162 @@
 <body>
   <div class="header">
     <a href="index.html" class="back-btn">← Back to Dashboard</a>
-    <h1>Complaint Details</h1>
+    <h1>Customer Complaints</h1>
   </div>
 
-  <div id="customerInfo" class="customer-info">
-    <div class="loading">Loading customer information...</div>
+  <div class="stats">
+    <p id="stats">Loading complaints...</p>
   </div>
 
-  <!-- Orders Table -->
-  <div class="section">
-    <div class="section-header">📦 Orders from Complaint Date</div>
-    <div class="section-content">
-      <table id="ordersTable">
-        <thead>
-          <tr>
-            <th>Order Date</th>
-            <th>Restaurant</th>
-            <th>Amount</th>
-            <th>Items</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td colspan="4" class="loading">Loading orders...</td></tr>
-        </tbody>
-      </table>
+  <div class="filters">
+    <div class="filter-group">
+      <label class="filter-label">Phone Number</label>
+      <input type="text" id="phoneFilter" class="filter-input" placeholder="Filter by phone...">
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Customer Name</label>
+      <input type="text" id="nameFilter" class="filter-input" placeholder="Filter by name...">
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Complaint Details</label>
+      <input type="text" id="detailsFilter" class="filter-input" placeholder="Filter by details...">
     </div>
   </div>
 
-  <!-- Complaint Table -->
-  <div class="section">
-    <div class="section-header">📝 Complaint Details</div>
-    <div class="section-content">
-      <table id="complaintTable">
-        <thead>
-          <tr>
-            <th>Complaint Date</th>
-            <th>Category</th>
-            <th>Details</th>
-            <th>Restaurant</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td colspan="4" class="loading">Loading complaint...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Resolution Table -->
-  <div class="section">
-    <div class="section-header">✅ Resolution Details</div>
-    <div class="section-content">
-      <table id="resolutionTable">
-        <thead>
-          <tr>
-            <th>Resolution Date</th>
-            <th>Status</th>
-            <th>Resolved By</th>
-            <th>Resolution Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td colspan="4" class="loading">Loading resolution...</td></tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="table-container">
+    <table id="complaintsTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Phone</th>
+          <th>Customer Name</th>
+          <th>Complaint Details</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="6" class="loading">Loading complaints...</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <script>
-    // Get phone number from URL parameters
+    // Get phone number from URL parameters for filtering
     const urlParams = new URLSearchParams(window.location.search);
-    const phone = urlParams.get('phone');
+    const phoneFilter = urlParams.get('phone');
 
-    // Function to normalize phone numbers
-    function normalizePhone(phone) {
-      if (!phone) return '';
-      return phone.toString().trim().replace(/\D/g, '');
-    }
+    let allComplaints = [];
+    let filteredComplaints = [];
 
-    // Function to format currency
-    function formatCurrency(amount) {
-      return 'EGP ' + (amount || 0).toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-    if (!phone) {
-      document.getElementById('customerInfo').innerHTML = '<div class="loading">No customer phone specified</div>';
-    } else {
-      // Load all data
-      Promise.all([
-        fetch('data.json').then(r => r.json()),
-        fetch('complaints.json').then(r => r.json()),
-        fetch('resolution.json').then(r => r.json()).catch(err => {
-          console.log('No resolution file:', err);
-          return {};
-        })
-      ])
-      .then(([orders, complaints, resolution]) => {
-        const normalizedPhone = normalizePhone(phone);
+    // Load complaints data
+    async function loadComplaints() {
+      try {
+        const response = await fetch('complaints.json');
+        allComplaints = await response.json();
         
-        // Find the complaint for this phone
-        const customerComplaint = complaints.find(c => 
-          normalizePhone(c.phone) === normalizedPhone
-        );
-
-        if (!customerComplaint) {
-          document.getElementById('customerInfo').innerHTML = `
-            <h2>Customer Not Found</h2>
-            <p style="color: var(--text-secondary);">No complaints found for phone: ${phone}</p>
-          `;
-          return;
+        // Apply initial phone filter if provided in URL
+        if (phoneFilter) {
+          document.getElementById('phoneFilter').value = phoneFilter;
         }
-
-        const complaintDate = new Date(customerComplaint.date);
         
-        // Find orders from the same date as complaint
-        const ordersFromComplaintDate = orders.filter(order => {
-          const orderDate = new Date(order['Created'] || '');
-          return orderDate.toDateString() === complaintDate.toDateString() && 
-                 normalizePhone(order['Account Phones']) === normalizedPhone;
-        });
-
-        // Get customer info
-        const customerOrders = orders.filter(o => 
-          normalizePhone(o['Account Phones']) === normalizedPhone
-        );
-        const customerName = customerOrders[0]?.['Account Name'] || 'Unknown Customer';
-
-        // Update customer info
-        document.getElementById('customerInfo').innerHTML = `
-          <h2>${customerName}</h2>
-          <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Phone: ${phone}</p>
-          <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-            <div><strong>Total Orders:</strong> ${customerOrders.length}</div>
-            <div><strong>Complaint Date:</strong> ${complaintDate.toLocaleDateString()}</div>
-            <div><strong>Category:</strong> ${customerComplaint.category || 'N/A'}</div>
-          </div>
-        `;
-
-        // Update Orders Table
-        const ordersTable = document.querySelector('#ordersTable tbody');
-        if (ordersFromComplaintDate.length === 0) {
-          ordersTable.innerHTML = '<tr><td colspan="4" class="no-data">No orders found from complaint date</td></tr>';
-        } else {
-          ordersTable.innerHTML = ordersFromComplaintDate.map(order => `
-            <tr>
-              <td>${new Date(order['Created'] || '').toLocaleDateString()}</td>
-              <td>${order['Resturant'] || order['Restaurant'] || 'N/A'}</td>
-              <td>${formatCurrency(parseFloat(order['Total Price']))}</td>
-              <td>${order['Product Names'] || 'N/A'}</td>
-            </tr>
-          `).join('');
-        }
-
-        // Update Complaint Table
-        const complaintTable = document.querySelector('#complaintTable tbody');
-        complaintTable.innerHTML = `
+        applyComplaintFilters();
+        
+      } catch (error) {
+        console.error('Error loading complaints:', error);
+        document.querySelector('#complaintsTable tbody').innerHTML = `
           <tr>
-            <td>${complaintDate.toLocaleDateString()}</td>
-            <td>${customerComplaint.category || 'Uncategorized'}</td>
-            <td>${customerComplaint.details || customerComplaint.complaint_details || 'No details provided'}</td>
-            <td>${customerComplaint.Restaurant || customerComplaint.restaurant || 'N/A'}</td>
+            <td colspan="6" style="text-align: center; color: #ef4444; padding: 2rem;">
+              Error loading complaints data
+            </td>
           </tr>
         `;
+      }
+    }
 
-        // Update Resolution Table
-        const resolutionTable = document.querySelector('#resolutionTable tbody');
+    // Apply filters to complaints
+    function applyComplaintFilters() {
+      const phoneValue = document.getElementById('phoneFilter').value.toLowerCase();
+      const nameValue = document.getElementById('nameFilter').value.toLowerCase();
+      const detailsValue = document.getElementById('detailsFilter').value.toLowerCase();
+
+      filteredComplaints = allComplaints.filter(complaint => {
+        const phoneMatch = !phoneValue || (complaint.phone && complaint.phone.toString().toLowerCase().includes(phoneValue));
+        const nameMatch = !nameValue || (complaint.name && complaint.name.toLowerCase().includes(nameValue));
+        const detailsMatch = !detailsValue || (complaint.details && complaint.details.toLowerCase().includes(detailsValue));
         
-        // Check if resolution exists for this phone
-        const resolutionPhone = normalizePhone(resolution.phone);
-        if (resolutionPhone === normalizedPhone) {
-          resolutionTable.innerHTML = `
-            <tr>
-              <td>${new Date(resolution.date || '').toLocaleDateString()}</td>
-              <td><span class="status-badge status-resolved">${resolution.Status || 'Resolved'}</span></td>
-              <td>${resolution.Resolvedby || 'N/A'}</td>
-              <td>${resolution.Resolution || resolution.resolution || 'No resolution details'}</td>
-            </tr>
-          `;
-        } else {
-          resolutionTable.innerHTML = `
-            <tr>
-              <td colspan="4" class="no-data">No resolution found for this complaint</td>
-            </tr>
-          `;
-        }
+        return phoneMatch && nameMatch && detailsMatch;
+      });
 
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('customerInfo').innerHTML = '<div class="loading">Error loading data</div>';
+      drawComplaintsTable();
+    }
+
+    // Draw complaints table
+    function drawComplaintsTable() {
+      const tbody = document.querySelector('#complaintsTable tbody');
+      
+      if (filteredComplaints.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              No complaints found matching your filters
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = filteredComplaints
+          .sort((a, b) => new Date(b.date || '') - new Date(a.date || ''))
+          .map(complaint => {
+            // Determine status
+            let statusClass = 'status-open';
+            let statusText = 'Open';
+            
+            if (complaint.status === 'Resolved' || complaint.resolved) {
+              statusClass = 'status-resolved';
+              statusText = 'Resolved';
+            } else if (complaint.status === 'Pending') {
+              statusClass = 'status-pending';
+              statusText = 'Pending';
+            }
+            
+            return `
+              <tr>
+                <td>${complaint.date || 'N/A'}</td>
+                <td>${complaint.phone || 'N/A'}</td>
+                <td>${complaint.name || 'N/A'}</td>
+                <td>${complaint.details || 'No details provided'}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>
+                  <a href="details.html?phone=${encodeURIComponent(complaint.phone || '')}" 
+                     class="view-details-btn" 
+                     target="_blank">
+                    View Details
+                  </a>
+                </td>
+              </tr>
+            `;
+          }).join('');
+      }
+      
+      // Update stats
+      document.getElementById('stats').textContent = 
+        `Showing ${filteredComplaints.length} of ${allComplaints.length} complaints`;
+    }
+
+    // Setup event listeners for filters
+    function setupFilters() {
+      ['phoneFilter', 'nameFilter', 'detailsFilter'].forEach(id => {
+        document.getElementById(id).addEventListener('input', applyComplaintFilters);
       });
     }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      setupFilters();
+      loadComplaints();
+    });
   </script>
 </body>
 </html>
