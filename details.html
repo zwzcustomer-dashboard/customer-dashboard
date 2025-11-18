@@ -45,7 +45,7 @@
     /* Header */
     .header {
       display: flex;
-      justify-content: between;
+      justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
     }
@@ -116,6 +116,73 @@
       font-size: 0.9rem;
       color: var(--text-secondary);
       font-weight: 600;
+    }
+
+    /* Resolution Section */
+    .resolution-section {
+      background: var(--surface);
+      padding: 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 2rem;
+      border-left: 4px solid #28a745;
+    }
+
+    .resolution-section h3 {
+      color: #28a745;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #28a745;
+      padding-bottom: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .resolution-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .resolution-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .resolution-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .resolution-value {
+      color: var(--text-primary);
+      font-weight: 500;
+      padding: 0.75rem;
+      background: #f8fffe;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .resolution-details {
+      margin-top: 1rem;
+    }
+
+    .resolution-text {
+      background: #f8fffe;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .no-resolution {
+      text-align: center;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
     }
 
     /* Orders Table */
@@ -222,6 +289,10 @@
       .summary-grid {
         grid-template-columns: 1fr;
       }
+
+      .resolution-grid {
+        grid-template-columns: 1fr;
+      }
       
       .table-container {
         overflow-x: auto;
@@ -237,6 +308,13 @@
 
   <div id="customerSummary" class="customer-summary">
     <div class="loading">Loading customer data...</div>
+  </div>
+
+  <div id="resolutionSection" class="resolution-section" style="display: none;">
+    <h3>Complaint Resolution</h3>
+    <div id="resolutionContent">
+      <!-- Resolution content will be loaded here -->
+    </div>
   </div>
 
   <div class="table-container">
@@ -261,6 +339,64 @@
     // Get phone number from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const phone = urlParams.get('phone');
+
+    // Function to load resolution details
+    async function loadResolutionDetails(customerPhone) {
+      try {
+        const response = await fetch('resolutions.json');
+        const resolutions = await response.json();
+        
+        // Find resolution for this customer
+        const resolution = resolutions.find(res => 
+          res.complaintId === customerPhone || res.phone === customerPhone
+        );
+        
+        const resolutionSection = document.getElementById('resolutionSection');
+        const resolutionContent = document.getElementById('resolutionContent');
+        
+        if (resolution) {
+          // Show resolution section and populate data
+          resolutionSection.style.display = 'block';
+          resolutionContent.innerHTML = `
+            <div class="resolution-grid">
+              <div class="resolution-field">
+                <span class="resolution-label">Resolution Date:</span>
+                <span class="resolution-value">${resolution.resolutionDate || 'N/A'}</span>
+              </div>
+              <div class="resolution-field">
+                <span class="resolution-label">Status:</span>
+                <span class="resolution-value" style="color: #28a745; font-weight: 600;">${resolution.status || 'Resolved'}</span>
+              </div>
+              <div class="resolution-field">
+                <span class="resolution-label">Resolved By:</span>
+                <span class="resolution-value">${resolution.resolvedBy || 'Call Center Agent'}</span>
+              </div>
+            </div>
+            <div class="resolution-details">
+              <span class="resolution-label">Resolution Details:</span>
+              <div class="resolution-text">${resolution.resolutionDetails || 'No resolution details provided.'}</div>
+            </div>
+          `;
+        } else {
+          // Show message if no resolution found
+          resolutionSection.style.display = 'block';
+          resolutionContent.innerHTML = `
+            <div class="no-resolution">
+              No resolution found for this customer's complaints.
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading resolution details:', error);
+        const resolutionSection = document.getElementById('resolutionSection');
+        resolutionSection.style.display = 'block';
+        document.getElementById('resolutionContent').innerHTML = `
+          <div class="no-resolution">
+            Error loading resolution details.
+          </div>
+        `;
+      }
+    }
 
     if (!phone) {
       document.getElementById('customerSummary').innerHTML = '<div class="loading">No customer phone specified</div>';
@@ -338,6 +474,9 @@
               </tr>
             `).join('');
         }
+
+        // Load resolution details after customer data is loaded
+        loadResolutionDetails(phone);
       })
       .catch(err => {
         console.error('Error loading data:', err);
