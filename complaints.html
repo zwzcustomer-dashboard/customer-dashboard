@@ -157,6 +157,61 @@
       border-left: 3px solid var(--primary);
     }
 
+    /* Order Info */
+    .order-info {
+      background: #f0f8f7;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+      border: 1px solid var(--border);
+    }
+
+    .order-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .order-detail {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .order-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .order-value {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* Resolution Section */
+    .resolution-section {
+      background: #f8fdf8;
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid #d1fae5;
+      margin-top: 1rem;
+    }
+
+    .resolution-section h4 {
+      color: #065f46;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .resolution-text {
+      color: #065f46;
+      line-height: 1.5;
+    }
+
     /* Status badges */
     .status-badge {
       padding: 0.25rem 0.75rem;
@@ -189,6 +244,14 @@
       color: var(--text-secondary);
     }
 
+    /* No Data */
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
     /* Links */
     a {
       color: var(--primary);
@@ -218,6 +281,10 @@
         flex-direction: column;
         align-items: flex-start;
       }
+      
+      .order-details {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -240,6 +307,25 @@
     const urlParams = new URLSearchParams(window.location.search);
     const phone = urlParams.get('phone');
 
+    // Function to find matching order for a complaint
+    function findMatchingOrder(complaint, orders) {
+      const complaintDate = new Date(complaint.date);
+      
+      // Try to find order on the same date
+      return orders.find(order => {
+        const orderDate = new Date(order['Created'] || '');
+        return orderDate.toDateString() === complaintDate.toDateString();
+      });
+    }
+
+    // Function to format currency
+    function formatCurrency(amount) {
+      return 'EGP ' + (amount || 0).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
     if (!phone) {
       document.getElementById('customerInfo').innerHTML = '<div class="loading">No customer phone specified</div>';
       document.getElementById('complaintsList').innerHTML = '<div class="loading">No customer phone specified</div>';
@@ -261,42 +347,89 @@
         );
         const customerName = customerOrders[0]?.['Account Name'] || 'Unknown Customer';
         const totalOrders = customerOrders.length;
+        const totalSpent = customerOrders.reduce((sum, order) => sum + (parseFloat(order['Total Price']) || 0), 0);
 
         // Update customer info
         document.getElementById('customerInfo').innerHTML = `
           <h2>${customerName}</h2>
           <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">Phone: ${phone}</p>
-          <p style="color: var(--text-secondary);">Total Orders: ${totalOrders}</p>
+          <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+            <div>
+              <strong>Total Orders:</strong> ${totalOrders}
+            </div>
+            <div>
+              <strong>Total Spent:</strong> ${formatCurrency(totalSpent)}
+            </div>
+            <div>
+              <strong>Total Complaints:</strong> ${customerComplaints.length}
+            </div>
+          </div>
         `;
 
         // Update complaints list
         const complaintsList = document.getElementById('complaintsList');
         if (customerComplaints.length === 0) {
-          complaintsList.innerHTML = '<div class="complaint-card"><div class="complaint-text">No complaints found for this customer</div></div>';
+          complaintsList.innerHTML = '<div class="complaint-card"><div class="no-data">No complaints found for this customer</div></div>';
         } else {
           complaintsList.innerHTML = customerComplaints
             .sort((a, b) => new Date(b.date || '') - new Date(a.date || ''))
-            .map(complaint => `
-              <div class="complaint-card">
-                <div class="complaint-header">
-                  <span class="complaint-category">${complaint.category || 'Uncategorized'}</span>
-                  <span class="complaint-date">${new Date(complaint.date || '').toLocaleDateString()}</span>
-                  <span class="status-badge ${complaint.status === 'resolved' ? 'status-resolved' : complaint.priority === 'high' ? 'status-urgent' : 'status-pending'}">
-                    ${complaint.status === 'resolved' ? 'Resolved' : complaint.priority === 'high' ? 'Urgent' : 'Pending'}
-                  </span>
+            .map(complaint => {
+              const matchingOrder = findMatchingOrder(complaint, customerOrders);
+              const complaintDate = new Date(complaint.date || '');
+              const status = complaint.status || 'pending';
+              const priority = complaint.priority || 'medium';
+              
+              return `
+                <div class="complaint-card">
+                  <div class="complaint-header">
+                    <span class="complaint-category">${complaint.category || 'Uncategorized'}</span>
+                    <span class="complaint-date">${complaintDate.toLocaleDateString()}</span>
+                    <span class="status-badge ${status === 'resolved' ? 'status-resolved' : priority === 'high' ? 'status-urgent' : 'status-pending'}">
+                      ${status === 'resolved' ? 'Resolved' : priority === 'high' ? 'Urgent' : 'Pending'}
+                    </span>
+                  </div>
+                  
+                  ${matchingOrder ? `
+                  <div class="order-info">
+                    <h3>📦 Related Order</h3>
+                    <div class="order-details">
+                      <div class="order-detail">
+                        <span class="order-label">Order Date</span>
+                        <span class="order-value">${new Date(matchingOrder['Created'] || '').toLocaleDateString()}</span>
+                      </div>
+                      <div class="order-detail">
+                        <span class="order-label">Restaurant</span>
+                        <span class="order-value">${matchingOrder['Resturant'] || matchingOrder['Restaurant'] || 'N/A'}</span>
+                      </div>
+                      <div class="order-detail">
+                        <span class="order-label">Amount</span>
+                        <span class="order-value">${formatCurrency(parseFloat(matchingOrder['Total Price']))}</span>
+                      </div>
+                    </div>
+                  </div>
+                  ` : ''}
+                  
+                  <div class="complaint-details">
+                    <h3>Complaint Details:</h3>
+                    <div class="complaint-text">${complaint.details || 'No details provided'}</div>
+                  </div>
+                  
+                  ${complaint.resolution ? `
+                  <div class="resolution-section">
+                    <h4>✅ Resolution</h4>
+                    <div class="resolution-text">${complaint.resolution}</div>
+                  </div>
+                  ` : ''}
+                  
+                  ${complaint.follow_up ? `
+                  <div class="complaint-details">
+                    <h3>Follow-up Actions:</h3>
+                    <div class="complaint-text">${complaint.follow_up}</div>
+                  </div>
+                  ` : ''}
                 </div>
-                <div class="complaint-details">
-                  <h3>Complaint Details:</h3>
-                  <div class="complaint-text">${complaint.details || 'No details provided'}</div>
-                </div>
-                ${complaint.resolution ? `
-                <div class="complaint-details">
-                  <h3>Resolution:</h3>
-                  <div class="complaint-text">${complaint.resolution}</div>
-                </div>
-                ` : ''}
-              </div>
-            `).join('');
+              `;
+            }).join('');
         }
       })
       .catch(err => {
