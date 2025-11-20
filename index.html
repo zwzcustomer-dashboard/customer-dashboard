@@ -27,845 +27,140 @@
       --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    * { 
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 2rem;
+      margin: 0; padding: 2rem;
       background: linear-gradient(135deg, #f0fffd 0%, #f8fffe 100%);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
+      color: var(--text-primary); line-height: 1.6; min-height: 100vh;
     }
 
     /* ----------  HEADER & REVENUE CARD  ---------- */
-    .header-container {
-      text-align: center;
-      margin-bottom: 2rem;
-      position: relative;
-    }
-
+    .header-container { text-align: center; margin-bottom: 2rem; }
     h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
+      font-size: 2.5rem; font-weight: 800;
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.025em;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.025em; margin-bottom: 0.5rem;
     }
+    .subtitle { color: var(--text-secondary); font-size: 1.1rem; font-weight: 400; margin-bottom: 1.5rem; }
 
-    .subtitle {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-      font-weight: 400;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Revenue Card */
     .revenue-card {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 2rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      text-align: center;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
+      color: white; padding: 2rem; border-radius: var(--radius);
+      box-shadow: var(--shadow-lg); text-align: center; margin-bottom: 2rem; position: relative; overflow: hidden;
     }
-
-    .revenue-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 100%);
-    }
-
-    .revenue-label {
-      font-size: 1rem;
-      font-weight: 600;
-      opacity: 0.9;
-      margin-bottom: 0.5rem;
-      position: relative;
-    }
-
-    .revenue-amount {
-      font-size: 3rem;
-      font-weight: 800;
-      margin: 0;
-      position: relative;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .revenue-subtitle {
-      font-size: 0.9rem;
-      opacity: 0.8;
-      margin-top: 0.5rem;
-      position: relative;
-    }
+    .revenue-label { font-size: 1rem; font-weight: 600; opacity: 0.9; margin-bottom: 0.5rem; position: relative; }
+    .revenue-amount { font-size: 3rem; font-weight: 800; margin: 0; position: relative; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .revenue-subtitle { font-size: 0.9rem; opacity: 0.8; margin-top: 0.5rem; position: relative; }
 
     /* KPI Grid */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .kpi-card {
-      background: var(--surface);
-      padding: 1.5rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      text-align: center;
-      border-left: 4px solid var(--primary);
-      transition: var(--transition);
-    }
-
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .kpi-value {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 0.5rem;
-    }
-
-    .kpi-label {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .kpi-card { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; border-left: 4px solid var(--primary); transition: var(--transition); }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .kpi-value { font-size: 2rem; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem; }
+    .kpi-label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
 
     /* Status Message */
-    #status {
-      margin-bottom: 1rem;
-      font-weight: 500;
-      padding: 1rem;
-      background: var(--surface);
-      border-radius: var(--radius-sm);
-      box-shadow: var(--shadow);
-    }
+    #status { margin-bottom: 1rem; font-weight: 500; padding: 1rem; background: var(--surface); border-radius: var(--radius-sm); box-shadow: var(--shadow); }
 
     /* ----------  FILTER BAR  ---------- */
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      background: var(--surface);
-      padding: 2rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border-light);
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-width: 150px;
-      flex: 1;
-    }
-
-    .filter-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .filter-input {
-      padding: 0.75rem 1rem;
-      border: 2px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 0.95rem;
-      transition: var(--transition);
-      background: var(--surface);
-    }
-
-    .filter-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0, 167, 157, 0.1);
-    }
-
-    .range-inputs {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .filter-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: flex-start;
-      flex: 1;
-      min-width: 200px;
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .checkbox-label input[type="checkbox"] {
-      display: none;
-    }
-
-    .checkmark {
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--border);
-      border-radius: 4px;
-      position: relative;
-      transition: var(--transition);
-    }
-
-    .checkbox-label input[type="checkbox"]:checked + .checkmark {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
-      content: '✓';
-      position: absolute;
-      color: white;
-      font-size: 12px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    /* Buttons */
-    .btn {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      color: #fff;
-      border: none;
-      padding: 0.875rem 1.5rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      box-shadow: var(--shadow);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 2px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      background: var(--background);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
+    .controls { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem; background: var(--surface); padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow-lg); border: 1px solid var(--border-light); }
+    .filter-group { display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px; flex: 1; }
+    .filter-label { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
+    .filter-input { padding: 0.75rem 1rem; border: 2px solid var(--border); border-radius: var(--radius-sm); font-size: 0.95rem; transition: var(--transition); background: var(--surface); }
+    .filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 167, 157, 0.1); }
+    .range-inputs { display: flex; gap: 0.5rem; }
+    .filter-actions { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; flex: 1; min-width: 200px; }
+    .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; }
+    .checkbox-label input[type="checkbox"] { display: none; }
+    .checkmark { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 4px; position: relative; transition: var(--transition); }
+    .checkbox-label input[type="checkbox"]:checked + .checkmark { background: var(--primary); border-color: var(--primary); }
+    .checkbox-label input[type="checkbox"]:checked + .checkmark::after { content: '✓'; position: absolute; color: white; font-size: 12px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: #fff; border: none; padding: 0.875rem 1.5rem; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: var(--shadow); }
+    .btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .btn-secondary { background: transparent; color: var(--text-secondary); border: 2px solid var(--border); }
+    .btn-secondary:hover { background: var(--background); border-color: var(--primary); color: var(--primary); }
 
     /* ----------  TABLE  ---------- */
-    .stats-container {
-      background: var(--surface);
-      padding: 1.5rem 2rem;
-      border-radius: var(--radius);
-      margin-bottom: 1.5rem;
-      box-shadow: var(--shadow);
-      border-left: 4px solid var(--primary);
-    }
+    .stats-container { background: var(--surface); padding: 1.5rem 2rem; border-radius: var(--radius); margin-bottom: 1.5rem; box-shadow: var(--shadow); border-left: 4px solid var(--primary); }
+    #stats { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin: 0; }
+    .table-container { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--border-light); }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 0.95rem; }
+    thead { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); }
+    th { padding: 1.25rem 1rem; text-align: left; color: white; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; position: relative; }
+    th:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); height: 60%; width: 1px; background: rgba(255, 255, 255, 0.2); }
+    tbody tr { transition: var(--transition); border-bottom: 1px solid var(--border-light); }
+    tbody tr:hover { background: #f5fffe; }
+    tbody tr:nth-child(even) { background: #f8fffe; }
+    td { padding: 1.25rem 1rem; color: var(--text-primary); font-weight: 500; }
+    .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status-active { background: #d1fae5; color: #065f46; }
+    .status-warning { background: #fef3c7; color: #92400e; }
+    .status-inactive { background: #fee2e2; color: #991b1b; }
+    .complaints-high { background: #fef2f2; border-left: 3px solid #ef4444; }
+    .talabat-indicator { background: #fef3c7; color: #92400e; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600; margin-left: 0.5rem; display: inline-block; }
+    a { color: var(--primary); text-decoration: none; font-weight: 600; transition: var(--transition); }
+    a:hover { color: var(--primary-dark); text-decoration: underline; }
+    .loading { text-align: center; padding: 2rem; color: var(--text-secondary); }
 
-    #stats {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .table-container {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-      border: 1px solid var(--border-light);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--surface);
-      font-size: 0.95rem;
-    }
-
-    thead {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    }
-
-    th {
-      padding: 1.25rem 1rem;
-      text-align: left;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      position: relative;
-    }
-
-    th:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 60%;
-      width: 1px;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    tbody tr {
-      transition: var(--transition);
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    tbody tr:hover {
-      background: #f5fffe;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #f8fffe;
-    }
-
-    td {
-      padding: 1.25rem 1rem;
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    /* Status badges */
-    .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-active {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .status-warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-inactive {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    /* Complaints indicator */
-    .complaints-high {
-      background: #fef2f2;
-      border-left: 3px solid #ef4444;
-    }
-
-    /* Talabat Data Indicator */
-    .talabat-indicator {
-      background: #fef3c7;
-      color: #92400e;
-      padding: 0.2rem 0.5rem;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      margin-left: 0.5rem;
-      display: inline-block;
-    }
-
-    /* Links */
-    a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-    a:hover {
-      color: var(--primary-dark);
-      text-decoration: underline;
-    }
-
-    /* Loading */
-    .loading {
-      text-align: center;
-      padding: 2rem;
-      color: var(--text-secondary);
-    }
-
-    /* NEW ENHANCEMENTS */
-    
-    /* Collapsible Filter Panel */
-    .filter-toggle {
-      display: none;
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 1rem;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .filter-toggle i {
-      transition: transform 0.3s ease;
-    }
-    
-    .filter-toggle.active i {
-      transform: rotate(180deg);
-    }
-    
-    /* Search Bar Enhancement */
-    .search-container {
-      position: relative;
-      width: 100%;
-      margin-bottom: 1.5rem;
-    }
-    
-    .search-input {
-      width: 100%;
-      padding: 1rem 1rem 1rem 3rem;
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 1rem;
-      background: var(--surface);
-      transition: var(--transition);
-    }
-    
-    .search-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0, 167, 157, 0.1);
-    }
-    
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-    
-    /* Table Enhancements */
-    .table-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    
-    .table-actions .btn {
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
-    }
-    
-    /* Customer Status Indicators */
-    .customer-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    
-    .status-dot.active {
-      background-color: #10b981;
-    }
-    
-    .status-dot.warning {
-      background-color: #f59e0b;
-    }
-    
-    .status-dot.lost {
-      background-color: #ef4444;
-    }
-    
-    /* Data Visualization */
-    .chart-container {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow);
-    }
-    
-    .chart-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--text-primary);
-    }
-    
-    .chart-placeholder {
-      height: 200px;
-      background: linear-gradient(135deg, #f0f8f7 0%, #e0f0ee 100%);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-    
-    /* Responsive Improvements */
-    @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-      }
-      
-      .header-container {
-        text-align: left;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .revenue-amount {
-        font-size: 2.5rem;
-      }
-      
-      .controls {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1.5rem;
-      }
-      
-      .filter-group {
-        min-width: 100%;
-      }
-      
-      .filter-actions {
-        flex-direction: column;
-        min-width: 100%;
-      }
-      
-      .table-container {
-        overflow-x: auto;
-      }
-      
-      th, td {
-        padding: 1rem 0.75rem;
-        font-size: 0.9rem;
-      }
-      
-      .kpi-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-      }
-      
-      .kpi-value {
-        font-size: 1.5rem;
-      }
-      
-      .filter-toggle {
-        display: flex;
-      }
-      
-      .controls.collapsed {
-        display: none;
-      }
-    }
+    /* ----------  RESPONSIVE  ---------- */
+    @media (max-width: 768px) { body { padding: 1rem; } .header-container { text-align: left; } h1 { font-size: 2rem; } .revenue-amount { font-size: 2.5rem; } .controls { flex-direction: column; gap: 1rem; padding: 1.5rem; } .filter-group, .filter-actions { min-width: 100%; } .table-container { overflow-x: auto; } th, td { padding: 1rem 0.75rem; font-size: 0.9rem; } .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; } .kpi-value { font-size: 1.5rem; } }
   </style>
 </head>
 <body>
-  <!-- Header Section -->
+  <!-- Header -->
   <div class="header-container">
     <h1>Customer Analytics Dashboard</h1>
     <p class="subtitle">Comprehensive customer insights and order analytics</p>
   </div>
 
-  <!-- Search Bar -->
-  <div class="search-container">
-    <i class="fas fa-search search-icon"></i>
-    <input type="text" class="search-input" placeholder="Search customers, orders, or complaints...">
-  </div>
-
-  <!-- Revenue Card -->
+  <!-- KPI CARDS -->
   <div class="revenue-card">
     <div class="revenue-label">Total Revenue</div>
     <div class="revenue-amount" id="totalRevenue">EGP 0.00</div>
     <div class="revenue-subtitle">Across all customers and orders</div>
   </div>
 
-  <!-- KPI Grid -->
   <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-value" id="totalCustomers">0</div>
-      <div class="kpi-label">Total Customers</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value" id="avgOrderValue">EGP 0.00</div>
-      <div class="kpi-label">Avg Order Value</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value" id="withComplaints">0%</div>
-      <div class="kpi-label">With Complaints</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value" id="lostCustomers">0</div>
-      <div class="kpi-label">Lost Customers</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-value" id="oldTalabatData">0%</div>
-      <div class="kpi-label">Old Talabat Data</div>
-    </div>
+    <div class="kpi-card"><div class="kpi-value" id="totalCustomers">0</div><div class="kpi-label">Total Customers</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="avgOrderValue">EGP 0.00</div><div class="kpi-label">Avg Order Value</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="withComplaints">0%</div><div class="kpi-label">With Complaints</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="lostCustomers">0</div><div class="kpi-label">Lost Customers</div></div>
+    <div class="kpi-card"><div class="kpi-value" id="oldTalabatData">0%</div><div class="kpi-label">Old Talabat Data</div></div>
   </div>
 
-  <!-- Chart Placeholder -->
-  <div class="chart-container">
-    <div class="chart-title">Customer Order Trends</div>
-    <div class="chart-placeholder">
-      <i class="fas fa-chart-line" style="font-size: 2rem; margin-right: 1rem;"></i>
-      Interactive chart would appear here with real data
-    </div>
-  </div>
-
-  <!-- Status Message -->
+  <!-- STATUS -->
   <div id="status">Loading data...</div>
 
-  <!-- Filter Toggle for Mobile -->
-  <button class="filter-toggle" id="filterToggle">
-    <i class="fas fa-filter"></i>
-    Filters
-  </button>
-
-  <!-- Filters Section -->
+  <!-- FILTERS -->
   <div class="controls" id="filterControls">
-    <div class="filter-group">
-      <label class="filter-label">Restaurant</label>
-      <select id="restFilter" class="filter-input">
-        <option>All</option>
-      </select>
-    </div>
-    
-    <div class="filter-group">
-      <label class="filter-label">Year</label>
-      <select id="yearFilter" class="filter-input">
-        <option>All</option>
-      </select>
-    </div>
-    
-    <div class="filter-group">
-      <label class="filter-label">Avg Order (EGP)</label>
-      <div class="range-inputs">
-        <input type="number" id="avgMin" class="filter-input" placeholder="Min">
-        <input type="number" id="avgMax" class="filter-input" placeholder="Max">
-      </div>
-    </div>
-    
-    <div class="filter-group">
-      <label class="filter-label">Total Spent (EGP)</label>
-      <div class="range-inputs">
-        <input type="number" id="totMin" class="filter-input" placeholder="Min">
-        <input type="number" id="totMax" class="filter-input" placeholder="Max">
-      </div>
-    </div>
-    
-    <div class="filter-group">
-      <label class="filter-label">Days Since Last Order</label>
-      <div class="range-inputs">
-        <input type="number" id="lastMin" class="filter-input" placeholder="Min">
-        <input type="number" id="lastMax" class="filter-input" placeholder="Max">
-      </div>
-    </div>
-    
-    <div class="filter-group">
-      <label class="filter-label">Order Count</label>
-      <div class="range-inputs">
-        <input type="number" id="ordMin" class="filter-input" placeholder="Min">
-        <input type="number" id="ordMax" class="filter-input" placeholder="Max">
-      </div>
-    </div>
-    
+    <div class="filter-group"><label class="filter-label">Restaurant</label><select id="restFilter" class="filter-input"><option>All</option></select></div>
+    <div class="filter-group"><label class="filter-label">Year</label><select id="yearFilter" class="filter-input"><option>All</option></select></div>
+    <div class="filter-group"><label class="filter-label">Avg Order (EGP)</label><div class="range-inputs"><input type="number" id="avgMin" class="filter-input" placeholder="Min"><input type="number" id="avgMax" class="filter-input" placeholder="Max"></div></div>
+    <div class="filter-group"><label class="filter-label">Total Spent (EGP)</label><div class="range-inputs"><input type="number" id="totMin" class="filter-input" placeholder="Min"><input type="number" id="totMax" class="filter-input" placeholder="Max"></div></div>
+    <div class="filter-group"><label class="filter-label">Days Since Last Order</label><div class="range-inputs"><input type="number" id="lastMin" class="filter-input" placeholder="Min"><input type="number" id="lastMax" class="filter-input" placeholder="Max"></div></div>
+    <div class="filter-group"><label class="filter-label">Order Count</label><div class="range-inputs"><input type="number" id="ordMin" class="filter-input" placeholder="Min"><input type="number" id="ordMax" class="filter-input" placeholder="Max"></div></div>
     <div class="filter-actions">
-      <label class="checkbox-label">
-        <input type="checkbox" id="lostOnly">
-        <span class="checkmark"></span>
-        Show only lost customers (90+ days)
-      </label>
-      
+      <label class="checkbox-label"><input type="checkbox" id="lostOnly"><span class="checkmark"></span>Show only lost customers (90+ days)</label>
       <input type="text" id="complaintKeyword" class="filter-input" placeholder="Search complaint details...">
-      
       <input type="number" id="compMin" class="filter-input" placeholder="Min complaints">
-      
-      <button class="btn btn-secondary" onclick="resetFilters()">
-        <i class="fas fa-redo"></i>
-        Reset Filters
-      </button>
+      <button class="btn btn-secondary" onclick="resetFilters()"><i class="fas fa-redo"></i>Reset Filters</button>
     </div>
   </div>
 
-  <!-- Stats and Table -->
-  <div class="stats-container">
-    <p id="stats">Loading customer data...</p>
-  </div>
-
-  <div class="table-actions">
-    <div>
-      <button class="btn">
-        <i class="fas fa-download"></i>
-        Export Data
-      </button>
-    </div>
-    <div>
-      <button class="btn btn-secondary">
-        <i class="fas fa-columns"></i>
-        Customize Columns
-      </button>
-    </div>
-  </div>
-
+  <!-- STATS + TABLE -->
+  <div class="stats-container"><p id="stats">Loading customer data...</p></div>
   <div class="table-container">
     <table id="mainTable">
       <thead>
-        <tr>
-          <th>Phone</th>
-          <th>Customer Name</th>
-          <th>Orders</th>
-          <th>Total Spent</th>
-          <th>Avg Order</th>
-          <th>Last Order</th>
-          <th>Days Ago</th>
-          <th>Complaints</th>
-        </tr>
+        <tr><th>Phone</th><th>Customer Name</th><th>Orders</th><th>Total Spent</th><th>Avg Order</th><th>Last Order</th><th>Days Ago</th><th>Complaints</th></tr>
       </thead>
-      <tbody>
-        <tr>
-          <td colspan="8" class="loading">Loading customer data...</td>
-        </tr>
-      </tbody>
+      <tbody><tr><td colspan="8" class="loading">Loading customer data...</td></tr></tbody>
     </table>
   </div>
 
-  <script>
-    // Toggle filter panel on mobile
-    document.getElementById('filterToggle').addEventListener('click', function() {
-      const filterControls = document.getElementById('filterControls');
-      filterControls.classList.toggle('collapsed');
-      this.classList.toggle('active');
-    });
-
-    // Initialize with sample data for demonstration
-    document.addEventListener('DOMContentLoaded', function() {
-      // Update KPI values with sample data
-      document.getElementById('totalRevenue').textContent = 'EGP 125,430.75';
-      document.getElementById('totalCustomers').textContent = '1,247';
-      document.getElementById('avgOrderValue').textContent = 'EGP 245.60';
-      document.getElementById('withComplaints').textContent = '8.2%';
-      document.getElementById('lostCustomers').textContent = '89';
-      document.getElementById('oldTalabatData').textContent = '12.5%';
-      
-      // Update status
-      document.getElementById('status').textContent = 'Data loaded successfully';
-      document.getElementById('status').style.color = '#10b981';
-      
-      // Update stats
-      document.getElementById('stats').textContent = 'Showing 1,247 customers with 3,892 total orders';
-      
-      // Populate table with sample data
-      const tableBody = document.querySelector('#mainTable tbody');
-      tableBody.innerHTML = '';
-      
-      const sampleData = [
-        ['+20 123 456 7890', 'Ahmed Mohamed', '15', 'EGP 4,250', 'EGP 283', '2023-10-15', '12', '0'],
-        ['+20 123 456 7891', 'Fatma Hassan', '8', 'EGP 1,890', 'EGP 236', '2023-09-22', '35', '1'],
-        ['+20 123 456 7892', 'Mahmoud Ali', '23', 'EGP 7,640', 'EGP 332', '2023-11-05', '2', '0'],
-        ['+20 123 456 7893', 'Nour Ibrahim', '5', 'EGP 1,120', 'EGP 224', '2023-07-18', '112', '2'],
-        ['+20 123 456 7894', 'Yara Salah', '12', 'EGP 3,450', 'EGP 288', '2023-10-28', '9', '0']
-      ];
-      
-      sampleData.forEach(row => {
-        const tr = document.createElement('tr');
-        
-        row.forEach((cell, index) => {
-          const td = document.createElement('td');
-          
-          if (index === 7) { // Complaints column
-            if (cell > 0) {
-              td.innerHTML = `<span class="status-badge status-warning">${cell}</span>`;
-            } else {
-              td.innerHTML = `<span class="status-badge status-active">${cell}</span>`;
-            }
-          } else if (index === 6) { // Days Ago column
-            const days = parseInt(cell);
-            td.innerHTML = `<div class="customer-status">
-              <span class="status-dot ${days < 30 ? 'active' : days < 90 ? 'warning' : 'lost'}"></span>
-              ${cell}
-            </div>`;
-          } else {
-            td.textContent = cell;
-          }
-          
-          tr.appendChild(td);
-        });
-        
-        tableBody.appendChild(tr);
-      });
-    });
-
-    function resetFilters() {
-      // Reset all filter inputs
-      document.querySelectorAll('.filter-input').forEach(input => {
-        if (input.type === 'text' || input.type === 'number') {
-          input.value = '';
-        } else if (input.tagName === 'SELECT') {
-          input.selectedIndex = 0;
-        }
-      });
-      
-      document.getElementById('lostOnly').checked = false;
-      
-      // Show confirmation
-      document.getElementById('status').textContent = 'Filters have been reset';
-      document.getElementById('status').style.color = '#10b981';
-      
-      setTimeout(() => {
-        document.getElementById('status').textContent = 'Data loaded successfully';
-      }, 3000);
-    }
-  </script>
+  <!-- REAL ENGINE -->
+  <script src="app.js"></script>
 </body>
 </html>
