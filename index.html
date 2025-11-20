@@ -239,14 +239,25 @@
       </div>
     </div>
     
-    <!-- Row 4: Complaint search and Lost customers checkbox -->
+    <!-- Row 4: Complaint dropdown and Lost customers checkbox -->
     <div class="filter-actions">
       <div class="filter-group">
-        <label class="filter-label">Search complaint details...</label>
-        <input type="text" id="complaintKeyword" class="filter-input" placeholder="Enter complaint keywords">
+        <label class="filter-label">Complaint Type</label>
+        <select id="complaintType" class="filter-input">
+          <option value="">All Complaints</option>
+          <option value="call center">Call Center</option>
+          <option value="delay delivery">Delay Delivery</option>
+          <option value="food and safety">Food and Safety</option>
+          <option value="food temperature">Food Temperature</option>
+          <option value="missing item">Missing Item</option>
+          <option value="other complaints">Other Complaints</option>
+          <option value="packaging">Packaging</option>
+          <option value="portion">Portion</option>
+          <option value="quality of food">Quality of Food</option>
+        </select>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Min complaints</label>
+        <label class="filter-label">Min Complaints</label>
         <input type="number" id="compMin" class="filter-input" placeholder="0">
       </div>
       <label class="checkbox-label">
