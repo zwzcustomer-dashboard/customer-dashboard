@@ -3,16 +3,22 @@ const COL_PHONE = 'Account Phones';
 const COL_NAME  = 'Account Name';
 const COL_TOTAL = 'Total Price';
 const COL_DATE  = 'Created';
-const COL_REST  = 'Resturant';          // note the typo in your JSON
+const COL_REST  = 'Resturant';
 const COL_PAY   = 'Payment Method';
 
 const today = new Date();
 
-let rawOrders   = [];   // 40 k flat rows
-let aggCustomers= [];   // 14 k grouped customers
-let complaints  = [];   // complaint rows
-let restaurants = new Set();
-let years       = new Set();
+let rawOrders   = [];
+let aggCustomers= [];
+let complaints  = [];
+
+/* ----------  DATE NORMALISER (both formats)  ---------- */
+function parseDate(d) {
+  if (!d) return null;
+  if (d.includes('-')) return new Date(d);           // ISO
+  const [day, month, year] = d.split('/').map(Number);
+  return new Date(year, month - 1, day);             // dd/m/yyyy
+}
 
 /* ----------  LOAD & BOOT  ---------- */
 Promise.all([
@@ -25,7 +31,7 @@ Promise.all([
   buildAggregates();
   populateDropdowns();
   wireFilters();
-  applyFilters();        // first paint
+  applyFilters();
   updateKPICards();
   setStatus('Ready.','green');
 })
@@ -46,12 +52,10 @@ function buildAggregates(){
     if(!map.has(phone)) map.set(phone,{name:o[COL_NAME]||'—', phone, orders:[], total:0});
     const obj=map.get(phone);
     const amt  = parseFloat(o[COL_TOTAL])||0;
-    const date = new Date(o[COL_DATE]||0);
+    const date = parseDate(o[COL_DATE]);              // <-- normaliser used here
     const rest = o[COL_REST]||'';
     obj.orders.push({date, value:amt, rest, pay:o[COL_PAY]||''});
     obj.total+=amt;
-    restaurants.add(rest);
-    years.add(date.getFullYear());
   });
 
   aggCustomers=[...map.values()].map(c=>{
@@ -92,10 +96,10 @@ function updateKPICards(){
 
 /* ----------  DROPDOWNS  ---------- */
 function populateDropdowns(){
-  document.getElementById('restFilter').innerHTML=
-    ['All',...restaurants].map(r=>`<option>${r}</option>`).join('');
-  document.getElementById('yearFilter').innerHTML=
-    ['All',...years].sort((a,b)=>b-a).map(y=>`<option>${y}</option>`).join('');
+  const rests=['All',...new Set(rawOrders.map(o=>o[COL_REST]||''))].sort();
+  const years=['All',...new Set(aggCustomers.map(c=>c.year))].sort((a,b)=>b-a);
+  document.getElementById('restFilter').innerHTML=rests.map(r=>`<option>${r}</option>`).join('');
+  document.getElementById('yearFilter').innerHTML=years.map(y=>`<option>${y}</option>`).join('');
 }
 
 /* ----------  FILTER LOGIC  ---------- */
@@ -103,9 +107,6 @@ function wireFilters(){
   ['restFilter','yearFilter','avgMin','avgMax','totMin','totMax',
    'lastMin','lastMax','ordMin','ordMax','lostOnly','complaintKeyword','compMin']
    .forEach(id=>document.getElementById(id).addEventListener('input',applyFilters));
-  document.getElementById('filterToggle').addEventListener('click',()=>{
-    document.getElementById('filterControls').classList.toggle('collapsed');
-  });
 }
 
 function applyFilters(){
@@ -148,7 +149,7 @@ function drawTable(data){
     const tr=document.createElement('tr');
     const status=c.daysAgo>90?'status-inactive':c.daysAgo>60?'status-warning':'status-active';
     const badge=`<span class="status-badge ${status}">${c.daysAgo}</span>`;
-    const talabat=c.hasOldTalabat?`<span class="talabat-indicator">⚠️ Talabat</span>`:'';
+    const talabat=c.hasOldTalabat?'<span class="talabat-indicator">⚠️ Talabat</span>':'';
     const compLink=c.compCount?`<a href="complaint-details.html?phone=${encodeURIComponent(c.phone)}" target="_blank">${c.compCount}</a>`:'0';
 
     tr.innerHTML=`
