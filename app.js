@@ -12,12 +12,38 @@ let rawOrders    = [];
 let customersMap = new Map();   // phone -> customer object
 let complaints   = [];
 
-/* ----------  DATE NORMALISER (both formats)  ---------- */
+/* ----------  DATE NORMALISER (FIXED FOR BOTH FORMATS)  ---------- */
 function parseDate(d) {
   if (!d) return null;
-  if (d.includes('-')) return new Date(d);           // ISO
-  const [day, month, year] = d.split('/').map(Number);
-  return new Date(year, month - 1, day);             // dd/m/yyyy
+  
+  // Handle ISO format (yyyy-mm-dd)
+  if (d.includes('-') && d.split('-')[0].length === 4) {
+    return new Date(d);
+  }
+  
+  // Handle dd-mm-yyyy and mm-dd-yyyy formats
+  if (d.includes('-')) {
+    const parts = d.split('-').map(Number);
+    if (parts.length === 3) {
+      // Auto-detect format: if first part > 12, it's dd-mm-yyyy
+      if (parts[0] > 12) {
+        // dd-mm-yyyy format
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+      } else {
+        // mm-dd-yyyy format  
+        return new Date(parts[2], parts[0] - 1, parts[1]);
+      }
+    }
+  }
+  
+  // Handle dd/mm/yyyy format (your existing code)
+  if (d.includes('/')) {
+    const [day, month, year] = d.split('/').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  
+  console.warn('Unknown date format:', d);
+  return new Date(0); // Return invalid date as fallback
 }
 
 /* ----------  LOAD & BOOT  ---------- */
@@ -75,7 +101,7 @@ function updateKPICards(){
   const list = [...customersMap.values()];
   const totalRev   = list.reduce((s,c)=>s+c.total,0);
   const totalOrd   = list.reduce((s,c)=>s+c.orders.length,0);
-  const lostCnt    = list.filter(c=>daysAgo(c)<0).length;          // helper below
+  const lostCnt    = list.filter(c=>daysAgo(c)>=90).length;  // Fixed: changed from <0 to >=90
   const withComp   = list.filter(c=>complaints.filter(x=>x.phone===c.phone).length>0).length;
   const oldTala    = list.filter(c=>c.orders.some(o=>['Talabat','Elmenus','Instashop'].includes(o.rest))).length;
 
@@ -98,8 +124,14 @@ function populateDropdowns(){
 /* ----------  FILTER WIRING  ---------- */
 function wireFilters(){
   ['restFilter','yearFilter','avgMin','avgMax','totMin','totMax',
-   'lastMin','lastMax','ordMin','ordMax','lostOnly','complaintKeyword','compMin']
-   .forEach(id=>document.getElementById(id).addEventListener('input',applyFilters));
+   'lastMin','lastMax','ordMin','ordMax','lostOnly','complaintType','compMin']
+   .forEach(id=>{
+     const element = document.getElementById(id);
+     if (element) {
+       element.addEventListener('input', applyFilters);
+       element.addEventListener('change', applyFilters);
+     }
+   });
 }
 
 /* ----------  LIVE FILTERS  ---------- */
@@ -115,13 +147,15 @@ function applyFilters(){
   const ordMin  = parseInt(document.getElementById('ordMin').value)||0;
   const ordMax  = parseInt(document.getElementById('ordMax').value)||Infinity;
   const lostOnly= document.getElementById('lostOnly').checked;
-  const keyword = document.getElementById('complaintKeyword').value.trim().toLowerCase();
+  const complaintType = document.getElementById('complaintType')?.value || '';
   const compMin = parseInt(document.getElementById('compMin').value)||0;
 
   let list=[...customersMap.values()].filter(c=>{
     const yrs = lastOrderYear(c);
     const days= daysAgo(c);
     const avg = c.total/c.orders.length;
+    const custComplaints = complaints.filter(x=>x.phone===c.phone);
+    
     return (
       (restSel==='All'||c.orders.some(o=>o.rest===restSel)) &&
       (yearSel==='All'||yrs===parseInt(yearSel)) &&
@@ -129,11 +163,9 @@ function applyFilters(){
       c.total>=totMin && c.total<=totMax &&
       days>=lastMin && days<=lastMax &&
       c.orders.length>=ordMin && c.orders.length<=ordMax &&
-      (!lostOnly||days>90) &&
-      (!keyword||complaints.some(x=>x.phone===c.phone &&
-        ((x.details||'').toLowerCase().includes(keyword)||
-         (x.category||'').toLowerCase().includes(keyword)))) &&
-      complaints.filter(x=>x.phone===c.phone).length>=compMin
+      (!lostOnly||days>=90) &&
+      (!complaintType||custComplaints.some(x=>(x.category||'').toLowerCase()===complaintType.toLowerCase())) &&
+      custComplaints.length>=compMin
     );
   });
   list.sort((a,b)=>b.orders.length-a.orders.length);
@@ -146,7 +178,7 @@ function drawTable(data){
   tbody.innerHTML='';
   data.forEach(c=>{
     const days = daysAgo(c);
-    const status=days>90?'status-inactive':days>60?'status-warning':'status-active';
+    const status=days>=90?'status-inactive':days>=30?'status-warning':'status-active';
     const badge=`<span class="status-badge ${status}">${days}</span>`;
     const talabat=c.orders.some(o=>['Talabat','Elmenus','Instashop'].includes(o.rest))?'<span class="talabat-indicator">⚠️ Old</span>':'';
     const compCount=complaints.filter(x=>x.phone===c.phone).length;
@@ -157,8 +189,8 @@ function drawTable(data){
       <td><a href="details.html?phone=${encodeURIComponent(c.phone)}" target="_blank">${c.phone}</a>${talabat}</td>
       <td>${c.name}</td>
       <td>${c.orders.length}</td>
-      <td>${c.total.toLocaleString('en-US',{minimumFractionDigits:2})}</td>
-      <td>${(c.total/c.orders.length).toFixed(2)}</td>
+      <td>EGP ${c.total.toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+      <td>EGP ${(c.total/c.orders.length).toFixed(2)}</td>
       <td>${lastOrderDate(c).toLocaleDateString()}</td>
       <td>${badge}</td>
       <td>${compLink}</td>`;
@@ -169,12 +201,48 @@ function drawTable(data){
 
 /* ----------  RESET  ---------- */
 window.resetFilters=()=>{
-  document.querySelectorAll('.filter-input').forEach(el=>el.value='');
+  document.querySelectorAll('.filter-input').forEach(el=>{
+    if (el.type === 'text' || el.type === 'number') {
+      el.value = '';
+    } else if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    }
+  });
   document.getElementById('lostOnly').checked=false;
   applyFilters();
+  setStatus('Filters reset','green');
+  setTimeout(()=>setStatus('Ready.','green'),2000);
 };
 
 /* ----------  HELPERS  ---------- */
-function lastOrderDate(c){ return c.orders.at(-1)?.date || new Date(0); }
-function lastOrderYear(c){ return lastOrderDate(c).getFullYear(); }
-function daysAgo(c){ return Math.floor((today - lastOrderDate(c))/864e5); }
+function lastOrderDate(c){ 
+  const lastOrder = c.orders.reduce((latest, order) => {
+    if (!latest || !order.date) return order.date;
+    if (!order.date) return latest;
+    return order.date > latest ? order.date : latest;
+  }, null);
+  
+  return lastOrder || new Date(0); 
+}
+
+function lastOrderYear(c){ 
+  const date = lastOrderDate(c);
+  return date.getFullYear(); 
+}
+
+function daysAgo(c){ 
+  const lastDate = lastOrderDate(c);
+  if (!lastDate || lastDate.getTime() === new Date(0).getTime()) return 0;
+  
+  // Normalize both dates to midnight to avoid timezone issues
+  const todayNormalized = new Date(today);
+  todayNormalized.setHours(0, 0, 0, 0);
+  
+  const lastDateNormalized = new Date(lastDate);
+  lastDateNormalized.setHours(0, 0, 0, 0);
+  
+  const diffTime = todayNormalized - lastDateNormalized;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  return Math.max(0, diffDays); // Ensure non-negative
+}
