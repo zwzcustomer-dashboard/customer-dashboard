@@ -265,7 +265,7 @@
         <span class="checkmark"></span>
         Show only lost customers (90+ days)
       </label>
-      <button class="btn btn-secondary" onclick="resetFilters()">
+      <button class="btn btn-secondary" id="resetFiltersBtn">
         <i class="fas fa-redo"></i>
         Reset Filters
       </button>
@@ -295,6 +295,82 @@
       </tbody>
     </table>
   </div>
+
+  <!-- JavaScript to handle the new complaint dropdown -->
+  <script>
+    // This script will help bridge the gap between the new HTML and your existing app.js
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add event listener to the new complaint dropdown
+      const complaintType = document.getElementById('complaintType');
+      if (complaintType) {
+        complaintType.addEventListener('change', function() {
+          // This will trigger your existing filter logic
+          if (window.applyFilters) {
+            window.applyFilters();
+          }
+        });
+      }
+      
+      // Update reset filters function
+      const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+      if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', function() {
+          resetFilters();
+        });
+      }
+      
+      // If your app.js expects a complaintKeyword element, create a hidden one
+      // to maintain compatibility
+      if (!document.getElementById('complaintKeyword')) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.id = 'complaintKeyword';
+        document.body.appendChild(hiddenInput);
+      }
+    });
+
+    // Function to sync the dropdown with the hidden input for compatibility
+    function syncComplaintFilter() {
+      const complaintType = document.getElementById('complaintType');
+      const complaintKeyword = document.getElementById('complaintKeyword');
+      if (complaintType && complaintKeyword) {
+        complaintKeyword.value = complaintType.value;
+      }
+    }
+
+    // Reset filters function
+    function resetFilters() {
+      // Reset all filter inputs
+      document.querySelectorAll('.filter-input').forEach(input => {
+        if (input.type === 'text' || input.type === 'number') {
+          input.value = '';
+        } else if (input.tagName === 'SELECT') {
+          input.selectedIndex = 0;
+        }
+      });
+      
+      document.getElementById('lostOnly').checked = false;
+      
+      // Sync the complaint filter
+      syncComplaintFilter();
+      
+      // Show confirmation
+      document.getElementById('status').textContent = 'Filters have been reset';
+      document.getElementById('status').style.color = '#10b981';
+      
+      // Reapply filters if your app.js has this function
+      if (window.applyFilters) {
+        window.applyFilters();
+      }
+      
+      setTimeout(() => {
+        document.getElementById('status').textContent = 'Data loaded successfully';
+      }, 3000);
+    }
+
+    // Call this function whenever the complaint dropdown changes
+    document.getElementById('complaintType')?.addEventListener('change', syncComplaintFilter);
+  </script>
 
   <!-- REAL ENGINE -->
   <script src="app.js"></script>
