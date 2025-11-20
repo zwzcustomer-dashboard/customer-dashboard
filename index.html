@@ -2,646 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <title>Restaurant Dashboard</title>
+  <title>Customer Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    /* ----------  RESET / BASE  ---------- */
-    :root {
-      --primary: #00a79d;
-      --primary-dark: #008c83;
-      --primary-light: #00b8ad;
-      --surface: #ffffff;
-      --background: #f8fffe;
-      --text-primary: #1a3a3a;
-      --text-secondary: #5a7a7a;
-      --text-muted: #8a9e9e;
-      --border: #e0f0ee;
-      --border-light: #f0f8f7;
-      --shadow: 0 1px 3px 0 rgba(0, 167, 157, 0.1), 0 1px 2px 0 rgba(0, 167, 157, 0.06);
-      --shadow-md: 0 4px 6px -1px rgba(0, 167, 157, 0.1), 0 2px 4px -1px rgba(0, 167, 157, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 167, 157, 0.1), 0 4px 6px -2px rgba(0, 167, 157, 0.05);
-      --radius: 12px;
-      --radius-sm: 8px;
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * { 
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 2rem;
-      background: linear-gradient(135deg, #f0fffd 0%, #f8fffe 100%);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /* ----------  HEADER & REVENUE CARD  ---------- */
-    .header-container {
-      text-align: center;
-      margin-bottom: 2rem;
-      position: relative;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.025em;
-    }
-
-    .subtitle {
-      color: var(--text-secondary);
-      font-size: 1.1rem;
-      font-weight: 400;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Revenue Card */
-    .revenue-card {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      padding: 2rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      text-align: center;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .revenue-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.1) 100%);
-    }
-
-    .revenue-label {
-      font-size: 1rem;
-      font-weight: 600;
-      opacity: 0.9;
-      margin-bottom: 0.5rem;
-      position: relative;
-    }
-
-    .revenue-amount {
-      font-size: 3rem;
-      font-weight: 800;
-      margin: 0;
-      position: relative;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .revenue-subtitle {
-      font-size: 0.9rem;
-      opacity: 0.8;
-      margin-top: 0.5rem;
-      position: relative;
-    }
-
-    /* KPI Grid */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .kpi-card {
-      background: var(--surface);
-      padding: 1.5rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      text-align: center;
-      border-left: 4px solid var(--primary);
-      transition: var(--transition);
-    }
-
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .kpi-value {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--primary);
-      margin-bottom: 0.5rem;
-    }
-
-    .kpi-label {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* Status Message */
-    #status {
-      margin-bottom: 1rem;
-      font-weight: 500;
-      padding: 1rem;
-      background: var(--surface);
-      border-radius: var(--radius-sm);
-      box-shadow: var(--shadow);
-    }
-
-    /* ----------  ORGANIZED FILTERS  ---------- */
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      background: var(--surface);
-      padding: 2rem;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border-light);
-    }
-
-    .filter-section {
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    .filter-section:last-child {
-      border-bottom: none;
-    }
-
-    .section-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 1rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--primary);
-      display: inline-block;
-    }
-
-    .filter-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-      align-items: start;
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .filter-label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 0.25rem;
-    }
-
-    .filter-input {
-      padding: 0.75rem 1rem;
-      border: 2px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 0.95rem;
-      transition: var(--transition);
-      background: var(--surface);
-      width: 100%;
-    }
-
-    .filter-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0, 167, 157, 0.1);
-    }
-
-    /* Range Inputs */
-    .range-inputs {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .range-input {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .range-separator {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 500;
-      padding: 0 0.25rem;
-      flex-shrink: 0;
-    }
-
-    /* Checkbox Group */
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-    }
-
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      cursor: pointer;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin: 0;
-      padding: 0.5rem 0;
-    }
-
-    .checkbox-label input[type="checkbox"] {
-      display: none;
-    }
-
-    .checkmark {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--border);
-      border-radius: 4px;
-      position: relative;
-      transition: var(--transition);
-      flex-shrink: 0;
-    }
-
-    .checkbox-label input[type="checkbox"]:checked + .checkmark {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
-      content: '✓';
-      position: absolute;
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    /* Actions Row */
-    .actions-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .filter-actions {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .btn {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      border: none;
-      padding: 0.875rem 2rem;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      box-shadow: var(--shadow);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 2px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      background: var(--background);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    /* ----------  TABLE  ---------- */
-    .stats-container {
-      background: var(--surface);
-      padding: 1.5rem 2rem;
-      border-radius: var(--radius);
-      margin-bottom: 1.5rem;
-      box-shadow: var(--shadow);
-      border-left: 4px solid var(--primary);
-    }
-
-    #stats {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin: 0;
-    }
-
-    .table-container {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
-      border: 1px solid var(--border-light);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--surface);
-      font-size: 0.95rem;
-    }
-
-    thead {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    }
-
-    th {
-      padding: 1.25rem 1rem;
-      text-align: left;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      position: relative;
-    }
-
-    th:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 60%;
-      width: 1px;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    tbody tr {
-      transition: var(--transition);
-      border-bottom: 1px solid var(--border-light);
-    }
-
-    tbody tr:hover {
-      background: #f5fffe;
-      transform: scale(1.002);
-      box-shadow: 0 2px 8px rgba(0, 167, 157, 0.1);
-    }
-
-    tbody tr:nth-child(even) {
-      background: #f8fffe;
-    }
-
-    td {
-      padding: 1.25rem 1rem;
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    /* Status badges */
-    .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .status-active {
-      background: #d1fae5;
-      color: #065f46;
-    }
-
-    .status-warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-inactive {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-
-    /* Complaints indicator */
-    .complaints-high {
-      background: #fef2f2;
-      border-left: 3px solid #ef4444;
-    }
-
-    /* Links */
-    a {
-      color: var(--primary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition);
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      background: rgba(0, 167, 157, 0.1);
-      border: 1px solid rgba(0, 167, 157, 0.2);
-    }
-
-    a:hover {
-      color: var(--primary-dark);
-      background: rgba(0, 167, 157, 0.15);
-      border-color: var(--primary);
-      text-decoration: none;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0, 167, 157, 0.2);
-    }
-
-    /* Phone number links */
-    .phone-link {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      background: linear-gradient(135deg, rgba(0, 167, 157, 0.1) 0%, rgba(0, 167, 157, 0.05) 100%);
-      border: 1px solid rgba(0, 167, 157, 0.3);
-      border-radius: 8px;
-      color: var(--primary);
-      font-weight: 600;
-      text-decoration: none;
-      transition: var(--transition);
-    }
-
-    .phone-link:hover {
-      background: linear-gradient(135deg, rgba(0, 167, 157, 0.2) 0%, rgba(0, 167, 157, 0.1) 100%);
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 167, 157, 0.2);
-    }
-
-    /* Complaint links */
-    .complaint-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 2rem;
-      height: 2rem;
-      padding: 0.25rem 0.75rem;
-      background: linear-gradient(135deg, rgba(0, 167, 157, 0.15) 0%, rgba(0, 167, 157, 0.1) 100%);
-      border: 1px solid rgba(0, 167, 157, 0.3);
-      border-radius: 20px;
-      color: var(--primary-dark);
-      font-weight: 700;
-      text-decoration: none;
-      transition: var(--transition);
-      font-size: 0.8rem;
-    }
-
-    .complaint-link:hover {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      border-color: var(--primary);
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 4px 12px rgba(0, 167, 157, 0.3);
-    }
-
-    /* ----------  MOBILE RESPONSIVE  ---------- */
-    @media (max-width: 768px) {
-      body {
-        padding: 1rem;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .revenue-amount {
-        font-size: 2.5rem;
-      }
-      
-      .controls {
-        padding: 1.5rem;
-        gap: 1rem;
-      }
-
-      .filter-row {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-
-      .actions-row {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
-      }
-
-      .filter-actions {
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .range-inputs {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .range-separator {
-        padding: 0;
-      }
-      
-      .table-container {
-        overflow-x: auto;
-      }
-      
-      th, td {
-        padding: 1rem 0.75rem;
-        font-size: 0.9rem;
-      }
-      
-      .kpi-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-      }
-      
-      .kpi-value {
-        font-size: 1.5rem;
-      }
-
-      .phone-link {
-        padding: 0.375rem 0.75rem;
-        font-size: 0.9rem;
-      }
-
-      .complaint-link {
-        min-width: 1.75rem;
-        height: 1.75rem;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .filter-section {
-        padding: 0.75rem 0;
-      }
-
-      .section-title {
-        font-size: 0.9rem;
-      }
-
-      .filter-input {
-        padding: 0.625rem 0.75rem;
-        font-size: 0.9rem;
-      }
-
-      .phone-link {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-      }
-
-      .complaint-link {
-        min-width: 1.5rem;
-        height: 1.5rem;
-        padding: 0.125rem 0.375rem;
-        font-size: 0.7rem;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Header Section -->
   <div class="header-container">
-    <h1>Restaurant Dashboard</h1>
-    <p class="subtitle">Customer analytics and insights</p>
+    <h1>Customer Analytics Dashboard</h1>
+    <p class="subtitle">Comprehensive customer insights and order analytics</p>
   </div>
 
   <!-- Revenue Card -->
   <div class="revenue-card">
-    <div class="revenue-label">TOTAL REVENUE EARNED</div>
+    <div class="revenue-label">Total Revenue</div>
     <div class="revenue-amount" id="totalRevenue">EGP 0.00</div>
-    <div class="revenue-subtitle">Lifetime customer spending</div>
+    <div class="revenue-subtitle">Across all customers and orders</div>
   </div>
 
-  <!-- KPI Cards -->
+  <!-- KPI Grid -->
   <div class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-value" id="totalCustomers">0</div>
@@ -659,126 +39,83 @@
       <div class="kpi-value" id="lostCustomers">0</div>
       <div class="kpi-label">Lost Customers</div>
     </div>
+    <div class="kpi-card">
+      <div class="kpi-value" id="oldTalabatData">0%</div>
+      <div class="kpi-label">Old Talabat Data</div>
+    </div>
   </div>
 
-  <div id="status">Loading data…</div>
+  <!-- Status Message -->
+  <div id="status" class="status-message">Loading data...</div>
 
-  <!-- Organized Filters -->
+  <!-- Filters Section -->
   <div class="controls">
-    <div class="filter-section">
-      <h3 class="section-title">Basic Filters</h3>
-      <div class="filter-row">
-        <div class="filter-group">
-          <span class="filter-label">Restaurant</span>
-          <select id="restFilter" class="filter-input">
-            <option>All</option>
-            <!-- Restaurants will be populated automatically -->
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <span class="filter-label">Year</span>
-          <select id="yearFilter" class="filter-input">
-            <option>All</option>
-            <!-- Years will be populated automatically -->
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">Orders Range</span>
-          <div class="range-inputs">
-            <input type="number" id="ordMin" placeholder="Min" class="filter-input range-input">
-            <span class="range-separator">to</span>
-            <input type="number" id="ordMax" placeholder="Max" class="filter-input range-input">
-          </div>
-        </div>
+    <div class="filter-group">
+      <label class="filter-label">Restaurant</label>
+      <select id="restFilter" class="filter-input">
+        <option>All</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label class="filter-label">Year</label>
+      <select id="yearFilter" class="filter-input">
+        <option>All</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label class="filter-label">Avg Order (EGP)</label>
+      <div class="range-inputs">
+        <input type="number" id="avgMin" class="filter-input range-input" placeholder="Min">
+        <input type="number" id="avgMax" class="filter-input range-input" placeholder="Max">
       </div>
     </div>
-
-    <div class="filter-section">
-      <h3 class="section-title">Spending Filters</h3>
-      <div class="filter-row">
-        <div class="filter-group">
-          <span class="filter-label">Avg Spend Range</span>
-          <div class="range-inputs">
-            <input type="number" id="avgMin" step="0.01" placeholder="Min" class="filter-input range-input">
-            <span class="range-separator">to</span>
-            <input type="number" id="avgMax" step="0.01" placeholder="Max" class="filter-input range-input">
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">Total Spend Range</span>
-          <div class="range-inputs">
-            <input type="number" id="totMin" step="0.01" placeholder="Min" class="filter-input range-input">
-            <span class="range-separator">to</span>
-            <input type="number" id="totMax" step="0.01" placeholder="Max" class="filter-input range-input">
-          </div>
-        </div>
+    
+    <div class="filter-group">
+      <label class="filter-label">Total Spent (EGP)</label>
+      <div class="range-inputs">
+        <input type="number" id="totMin" class="filter-input range-input" placeholder="Min">
+        <input type="number" id="totMax" class="filter-input range-input" placeholder="Max">
       </div>
     </div>
-
-    <div class="filter-section">
-      <h3 class="section-title">Activity Filters</h3>
-      <div class="filter-row">
-        <div class="filter-group">
-          <span class="filter-label">Days Since Last Order</span>
-          <div class="range-inputs">
-            <input type="number" id="lastMin" placeholder="Min" class="filter-input range-input">
-            <span class="range-separator">to</span>
-            <input type="number" id="lastMax" placeholder="Max" class="filter-input range-input">
-          </div>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">Complaint Type</span>
-          <select id="complaintKeyword" class="filter-input">
-            <option value="">All Complaints</option>
-            <option value="call center">call center</option>
-            <option value="delay">delay</option>
-            <option value="delivery">delivery</option>
-            <option value="food safety and poisoning">food safety and poisoning</option>
-            <option value="food temperature">food temperature</option>
-            <option value="missing items">missing items</option>
-            <option value="other complaints">other complaints</option>
-            <option value="packaging">packaging</option>
-            <option value="portion">portion</option>
-            <option value="quality of food">quality of food</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">Min Complaints</span>
-          <input type="number" id="compMin" placeholder="0" min="0" class="filter-input">
-        </div>
+    
+    <div class="filter-group">
+      <label class="filter-label">Days Since Last Order</label>
+      <div class="range-inputs">
+        <input type="number" id="lastMin" class="filter-input range-input" placeholder="Min">
+        <input type="number" id="lastMax" class="filter-input range-input" placeholder="Max">
       </div>
     </div>
-
-    <div class="filter-section">
-      <h3 class="section-title">Actions</h3>
-      <div class="filter-row actions-row">
-        <div class="filter-group checkbox-group">
-          <label class="checkbox-label">
-            <input type="checkbox" id="lostOnly">
-            <span class="checkmark"></span>
-            Show only lost customers (90+ days)
-          </label>
-        </div>
-        
-        <div class="filter-actions">
-          <button class="btn" id="applyFiltersBtn">
-            Apply Filters
-          </button>
-          <button class="btn btn-secondary" id="resetFiltersBtn">
-            Reset All
-          </button>
-        </div>
+    
+    <div class="filter-group">
+      <label class="filter-label">Order Count</label>
+      <div class="range-inputs">
+        <input type="number" id="ordMin" class="filter-input range-input" placeholder="Min">
+        <input type="number" id="ordMax" class="filter-input range-input" placeholder="Max">
       </div>
+    </div>
+    
+    <div class="filter-actions">
+      <label class="checkbox-label">
+        <input type="checkbox" id="lostOnly">
+        <span class="checkmark"></span>
+        Show only lost customers (90+ days)
+      </label>
+      
+      <input type="text" id="complaintKeyword" class="filter-input" placeholder="Search complaint details...">
+      
+      <input type="number" id="compMin" class="filter-input" placeholder="Min complaints">
+      
+      <button class="btn btn-secondary" onclick="resetFilters()">
+        🔄 Reset Filters
+      </button>
     </div>
   </div>
 
+  <!-- Stats and Table -->
   <div class="stats-container">
-    <div id="stats"></div>
+    <p id="stats">Loading customer data...</p>
   </div>
 
   <div class="table-container">
@@ -786,290 +123,23 @@
       <thead>
         <tr>
           <th>Phone</th>
-          <th>Account Name</th>
+          <th>Customer Name</th>
           <th>Orders</th>
-          <th>Total</th>
-          <th>Avg</th>
-          <th>Last order</th>
-          <th>Days ago</th>
+          <th>Total Spent</th>
+          <th>Avg Order</th>
+          <th>Last Order</th>
+          <th>Days Ago</th>
           <th>Complaints</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <tr>
+          <td colspan="8" class="loading">Loading customer data...</td>
+        </tr>
+      </tbody>
     </table>
   </div>
 
-  <script>
-    /* ----------  CONFIG  ---------- */
-    const COL_PHONE = 'Account Phones';
-    const COL_NAME  = 'Account Name';
-    const COL_TOTAL = 'Total Price';
-    const COL_DATE  = 'Created';
-    const COL_REST  = 'Resturant';
-
-    let rawRows    = [];
-    let aggData    = [];
-    let complaints = [];
-    const today    = new Date();
-
-    // Predefined restaurant list including Talabat
-    const predefinedRestaurants = [
-      'All',
-      'Beverly hills',
-      'CFC', 
-      'Lakeyard',
-      'Maadi',
-      'marassi',
-      'Water Way',
-      'West Mark',
-      'talabat'
-    ];
-
-    /* ----------  INITIALIZE DASHBOARD  ---------- */
-    function initializeDashboard() {
-      // Load data and set up event listeners
-      Promise.all([
-        fetch('data.json').then(r => r.json()),
-        fetch('complaints.json').then(r => r.json())
-      ])
-      .then(([dataRows, compRows]) => {
-        rawRows    = dataRows.map(r => ({...r, [COL_PHONE]: (r[COL_PHONE] || '').toString().trim()}));
-        complaints = compRows.map(c => ({...c, phone: (c.phone || '').toString().trim()}));
-        console.log('data phones  :', [...new Set(rawRows.map(r=>r[COL_PHONE]))].slice(0,5));
-        console.log('compl phones :', [...new Set(complaints.map(c=>c.phone))].slice(0,5));
-        aggregate();
-        populateDropdowns();
-        applyFilters();
-        updateKPICards();
-        setStatus('Ready.', 'green');
-      })
-      .catch(err => {
-        console.error(err);
-        setStatus('Error loading JSON files', 'red');
-      });
-
-      // Set up event listeners
-      setupEventListeners();
-    }
-
-    /* ----------  STATUS  ---------- */
-    function setStatus(msg, color = 'black') {
-      const s = document.getElementById('status');
-      s.textContent = msg;
-      s.style.color = color;
-    }
-
-    /* ----------  AGGREGATE  ---------- */
-    function aggregate() {
-      const map = {};
-      rawRows.forEach(r => {
-        const phone = r[COL_PHONE];
-        if (!phone) return;
-        if (!map[phone]) map[phone] = { phone, name: r[COL_NAME] || '—', orders: [], total: 0 };
-        const amt  = parseFloat(r[COL_TOTAL]) || 0;
-        const date = new Date(r[COL_DATE] || '');
-        const rest = r[COL_REST] || r['Restaurant'] || '';
-        map[phone].orders.push({ date, value: amt, rest });
-        map[phone].total += amt;
-      });
-
-      aggData = Object.values(map).map(x => {
-        x.orders.sort((a, b) => a.date - b.date);
-        const last = x.orders[x.orders.length - 1].date;
-        const days = Math.floor((today - last) / 864e5);
-        const compCount = complaints.filter(c => c.phone === x.phone).length;
-        return {
-          phone: x.phone,
-          name: x.name,
-          orders: x.orders.length,
-          totalSpent: x.total,
-          avgSpent: x.total / x.orders.length,
-          lastOrder: last,
-          daysAgo: days,
-          year: last.getFullYear(),
-          orderList: x.orders,
-          complaintCount: compCount
-        };
-      });
-    }
-
-    /* ----------  UPDATE KPI CARDS  ---------- */
-    function updateKPICards() {
-      // Total Revenue: Sum of all order amounts
-      const totalRevenue = rawRows.reduce((sum, order) => {
-        const amount = parseFloat(order[COL_TOTAL]) || 0;
-        return sum + amount;
-      }, 0);
-      document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
-      
-      // Total Customers: Count of unique phone numbers
-      const uniquePhones = [...new Set(rawRows.map(r => r[COL_PHONE]).filter(Boolean))];
-      document.getElementById('totalCustomers').textContent = uniquePhones.length.toLocaleString();
-      
-      // Average Order Value: Total Revenue / Total Customers
-      const avgOrderValue = totalRevenue / uniquePhones.length;
-      document.getElementById('avgOrderValue').textContent = formatCurrency(avgOrderValue);
-      
-      // Percentage with Complaints: (Customers with complaints / Total Customers) * 100
-      const customersWithComplaints = [...new Set(complaints.map(c => c.phone).filter(Boolean))].length;
-      const complaintPercentage = uniquePhones.length > 0 ? 
-        ((customersWithComplaints / uniquePhones.length) * 100).toFixed(1) : 0;
-      document.getElementById('withComplaints').textContent = `${complaintPercentage}%`;
-      
-      // Lost Customers: Customers who haven't ordered in 90+ days
-      const customerLastOrder = {};
-      rawRows.forEach(order => {
-        const phone = order[COL_PHONE];
-        if (!phone) return;
-        const orderDate = new Date(order[COL_DATE] || '');
-        if (!customerLastOrder[phone] || orderDate > customerLastOrder[phone]) {
-          customerLastOrder[phone] = orderDate;
-        }
-      });
-      
-      const lostCustomers = Object.values(customerLastOrder).filter(lastOrder => {
-        const daysSinceLastOrder = Math.floor((today - lastOrder) / 864e5);
-        return daysSinceLastOrder > 90;
-      }).length;
-      
-      document.getElementById('lostCustomers').textContent = lostCustomers.toLocaleString();
-    }
-
-    function formatCurrency(amount) {
-      return 'EGP ' + amount.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-    /* ----------  DROPDOWNS  ---------- */
-    function populateDropdowns() {
-      // Get restaurants from data and combine with predefined list
-      const dataRestaurants = [...new Set(rawRows.map(r => r[COL_REST] || r['Restaurant'] || '').filter(Boolean))];
-      const allRestaurants = [...new Set([...predefinedRestaurants, ...dataRestaurants])].sort();
-      
-      // Populate restaurant filter
-      const restFilter = document.getElementById('restFilter');
-      restFilter.innerHTML = allRestaurants.map(r => `<option>${r}</option>`).join('');
-      
-      // Populate year filter
-      const years = ['All', ...new Set(aggData.map(x => x.year))].sort((a, b) => b - a);
-      document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
-    }
-
-    /* ----------  EVENT LISTENERS SETUP  ---------- */
-    function setupEventListeners() {
-      // Apply Filters button click
-      document.getElementById('applyFiltersBtn').addEventListener('click', applyFilters);
-      
-      // Reset Filters button click
-      document.getElementById('resetFiltersBtn').addEventListener('click', resetFilters);
-      
-      // Enter key support for all filter inputs
-      const filterInputs = document.querySelectorAll('.filter-input');
-      filterInputs.forEach(input => {
-        input.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            applyFilters();
-          }
-        });
-      });
-      
-      // Real-time filtering for dropdowns and checkboxes
-      document.getElementById('restFilter').addEventListener('change', applyFilters);
-      document.getElementById('yearFilter').addEventListener('change', applyFilters);
-      document.getElementById('complaintKeyword').addEventListener('change', applyFilters);
-      document.getElementById('lostOnly').addEventListener('change', applyFilters);
-    }
-
-    /* ----------  FILTER FUNCTIONS  ---------- */
-    function applyFilters() {
-      const restSel  = document.getElementById('restFilter').value;
-      const yearSel  = document.getElementById('yearFilter').value;
-      const avgMin   = parseFloat(document.getElementById('avgMin').value) || 0;
-      const avgMax   = parseFloat(document.getElementById('avgMax').value) || Infinity;
-      const totMin   = parseFloat(document.getElementById('totMin').value) || 0;
-      const totMax   = parseFloat(document.getElementById('totMax').value) || Infinity;
-      const lastMin  = parseInt(document.getElementById('lastMin').value) || 0;
-      const lastMax  = parseInt(document.getElementById('lastMax').value) || Infinity;
-      const ordMin   = parseInt(document.getElementById('ordMin').value) || 0;
-      const ordMax   = parseInt(document.getElementById('ordMax').value) || Infinity;
-      const lostOnly = document.getElementById('lostOnly').checked;
-      const keyword  = document.getElementById('complaintKeyword').value.trim().toLowerCase();
-      const compMin  = parseInt(document.getElementById('compMin').value) || 0;
-
-      let list = aggData.filter(x =>
-        (restSel === 'All' || x.orderList.some(o => o.rest === restSel)) &&
-        (yearSel === 'All' || x.year === parseInt(yearSel)) &&
-        x.avgSpent >= avgMin && x.avgSpent <= avgMax &&
-        x.totalSpent >= totMin && x.totalSpent <= totMax &&
-        x.daysAgo >= lastMin && x.daysAgo <= lastMax &&
-        x.orders >= ordMin && x.orders <= ordMax &&
-        (!lostOnly || x.daysAgo > 90) &&
-        (!keyword || complaints.some(c => c.phone === x.phone && (
-          (c.details   || '').toLowerCase().includes(keyword) ||
-          (c.category  || '').toLowerCase().includes(keyword)
-        ))) &&
-        x.complaintCount >= compMin
-      );
-      
-      list.sort((a, b) => b.orders - a.orders);
-      drawTable(list);
-    }
-
-    function resetFilters() {
-      document.getElementById('restFilter').value = 'All';
-      document.getElementById('yearFilter').value = 'All';
-      document.getElementById('avgMin').value = '';
-      document.getElementById('avgMax').value = '';
-      document.getElementById('totMin').value = '';
-      document.getElementById('totMax').value = '';
-      document.getElementById('lastMin').value = '';
-      document.getElementById('lastMax').value = '';
-      document.getElementById('ordMin').value = '';
-      document.getElementById('ordMax').value = '';
-      document.getElementById('lostOnly').checked = false;
-      document.getElementById('complaintKeyword').value = '';
-      document.getElementById('compMin').value = '';
-      
-      applyFilters();
-    }
-
-    function drawTable(data) {
-      const tbody = document.querySelector('#mainTable tbody');
-      tbody.innerHTML = '';
-      data.forEach(r => {
-        const tr = document.createElement('tr');
-        
-        // Determine status badge based on days ago
-        let statusClass = 'status-active';
-        let statusText = r.daysAgo;
-        if (r.daysAgo > 90) {
-          statusClass = 'status-inactive';
-        } else if (r.daysAgo > 60) {
-          statusClass = 'status-warning';
-        }
-        
-        // Add complaints-high class if complaint count is high
-        const rowClass = r.complaintCount >= 3 ? 'complaints-high' : '';
-        
-        tr.className = rowClass;
-        tr.innerHTML = `
-          <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank" class="phone-link">${r.phone}</a></td>
-          <td>${r.name}</td>
-          <td>${r.orders}</td>
-          <td>${formatCurrency(r.totalSpent)}</td>
-          <td>${formatCurrency(r.avgSpent)}</td>
-          <td>${r.lastOrder.toLocaleDateString()}</td>
-          <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-          <td>${r.complaintCount > 0 ? `<a href="complaints.html?phone=${encodeURIComponent(r.phone)}" target="_blank" class="complaint-link">${r.complaintCount}</a>` : 0}</td>`;
-        tbody.appendChild(tr);
-      });
-      document.getElementById('stats').textContent = `Showing ${data.length.toLocaleString()} customers`;
-    }
-
-    // Initialize the dashboard when the page loads
-    document.addEventListener('DOMContentLoaded', initializeDashboard);
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
