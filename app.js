@@ -52,7 +52,7 @@ function buildAggregates(){
     if(!map.has(phone)) map.set(phone,{name:o[COL_NAME]||'—', phone, orders:[], total:0});
     const obj=map.get(phone);
     const amt  = parseFloat(o[COL_TOTAL])||0;
-    const date = parseDate(o[COL_DATE]);              // <-- normaliser used here
+    const date = parseDate(o[COL_DATE]);
     const rest = o[COL_REST]||'';
     obj.orders.push({date, value:amt, rest, pay:o[COL_PAY]||''});
     obj.total+=amt;
@@ -63,6 +63,8 @@ function buildAggregates(){
     const last=c.orders.at(-1).date;
     const days=Math.floor((today-last)/864e5);
     const compCount=complaints.filter(x=>x.phone===c.phone).length;
+    // OLD-PLATFORM INDICATOR: Talabat, Elmenus, Instashop
+    const hasOldTalabat=c.orders.some(o=>['Talabat','Elmenus','Instashop'].includes(o.rest));
     return {
       phone:c.phone,
       name:c.name,
@@ -73,7 +75,7 @@ function buildAggregates(){
       daysAgo:days,
       year:last.getFullYear(),
       compCount,
-      hasOldTalabat:c.orders.some(o=>o.value===200)
+      hasOldTalabat
     };
   });
 }
