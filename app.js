@@ -57,6 +57,11 @@ function aggregate() {
     const last = x.orders[x.orders.length - 1].date;
     const days = Math.floor((today - last) / 864e5);
     const compCount = complaints.filter(c => c.phone === x.phone).length;
+    
+    // Calculate old Talabat data indicator
+    const oldTalabatOrders = x.orders.filter(order => order.value === 200);
+    const hasOldTalabatData = oldTalabatOrders.length > 0;
+    
     return {
       phone: x.phone,
       name: x.name,
@@ -67,7 +72,9 @@ function aggregate() {
       daysAgo: days,
       year: last.getFullYear(),
       orderList: x.orders,
-      complaintCount: compCount
+      complaintCount: compCount,
+      hasOldTalabatData: hasOldTalabatData,
+      oldTalabatOrderCount: oldTalabatOrders.length
     };
   });
 }
@@ -94,6 +101,11 @@ function updateKPICards() {
   // Lost Customers (90+ days)
   const lostCustomers = aggData.filter(c => c.daysAgo > 90).length;
   document.getElementById('lostCustomers').textContent = lostCustomers.toLocaleString();
+  
+  // Old Talabat Data Indicator
+  const customersWithOldTalabat = aggData.filter(c => c.hasOldTalabatData).length;
+  const oldTalabatPercentage = ((customersWithOldTalabat / aggData.length) * 100).toFixed(1);
+  document.getElementById('oldTalabatData').textContent = `${oldTalabatPercentage}%`;
 }
 
 function formatCurrency(amount) {
@@ -105,8 +117,17 @@ function formatCurrency(amount) {
 
 /* ----------  DROPDOWNS  ---------- */
 function populateDropdowns() {
-  const rests = ['All', ...new Set(rawRows.map(r => r[COL_REST] || r['Restaurant'] || '').filter(Boolean))].sort();
+  // Get all restaurants and add the specific ones
+  const allRests = [...new Set(rawRows.map(r => r[COL_REST] || r['Restaurant'] || '').filter(Boolean))];
+  
+  // Add the specific restaurants you mentioned
+  const specialRestaurants = ['El menus', 'instashop', 'marsol'];
+  
+  // Combine and sort, making sure special ones are included
+  const rests = ['All', ...specialRestaurants, ...allRests.filter(r => !specialRestaurants.includes(r))].sort();
+  
   const years = ['All', ...new Set(aggData.map(x => x.year))].sort((a, b) => b - a);
+  
   document.getElementById('restFilter').innerHTML = rests.map(r => `<option>${r}</option>`).join('');
   document.getElementById('yearFilter').innerHTML = years.map(y => `<option>${y}</option>`).join('');
 }
@@ -191,9 +212,16 @@ function drawTable(data) {
     // Add complaints-high class if complaint count is high
     const rowClass = r.complaintCount >= 3 ? 'complaints-high' : '';
     
+    // Add old Talabat data indicator
+    const talabatIndicator = r.hasOldTalabatData ? 
+      `<span class="talabat-indicator" title="${r.oldTalabatOrderCount} order(s) from old Talabat data">⚠️ Talabat</span>` : '';
+    
     tr.className = rowClass;
     tr.innerHTML = `
-      <td><a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a></td>
+      <td>
+        <a href="details.html?phone=${encodeURIComponent(r.phone)}" target="_blank">${r.phone}</a>
+        ${talabatIndicator}
+      </td>
       <td>${r.name}</td>
       <td>${r.orders}</td>
       <td>${formatCurrency(r.totalSpent)}</td>
